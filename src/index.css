@@ -1,0 +1,86 @@
+@import "tailwindcss";
+@import "@fontsource-variable/geist";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: 'Geist Variable', sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--border);
+  --color-ring: var(--ring);
+  --radius-md: calc(var(--radius) * 0.8);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: #ffffff;
+  --foreground: #24292f;
+  --card: #ffffff;
+  --card-foreground: #24292f;
+  --primary: #0969da;
+  --muted: #f6f8fa;
+  --muted-foreground: #57606a;
+  --border: #adb8c6;
+  --ring: #0969da;
+}
+
+.dark {
+  --background: #0f1115;
+  --foreground: #e6e9ef;
+  --card: #171b22;
+  --card-foreground: #e6e9ef;
+  --primary: #f4c542;
+  --muted: #242a33;
+  --muted-foreground: #aab2c0;
+  --border: #4a5568;
+  --ring: #f4c542;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-muted text-foreground dark:bg-background;
+  }
+  html {
+    @apply font-sans;
+    font-size: 110%;
+  }
+}
+
+@layer utilities {
+  /** Same edge mix as elevated surfaces so active toggles stay visually consistent */
+  .border-elevated {
+    border-color: color-mix(in oklab, var(--border) 82%, var(--foreground) 18%);
+  }
+
+  .hide-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /** Matches projects table wrapper: solid border + card fill + layered shadow */
+  .table-elevated-surface {
+    @apply border bg-card;
+    border-color: color-mix(in oklab, var(--border) 82%, var(--foreground) 18%);
+    box-shadow:
+      0 1px 2px rgb(15 23 42 / 0.045),
+      0 3px 10px -4px rgb(15 23 42 / 0.08);
+  }
+  :is(.dark *) .table-elevated-surface {
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.14),
+      0 4px 14px -5px rgb(0 0 0 / 0.26);
+  }
+}
