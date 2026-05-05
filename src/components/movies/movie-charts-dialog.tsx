@@ -50,19 +50,26 @@ function buildGenreRatingAggs(movies: readonly Movie[]): GenreRatingAgg[] {
   });
 }
 
-type LikedGenreRow = { genre: string; likesInGenre: number };
+type GenreLikeSplit = { genre: string; liked: number; notLiked: number };
 
-function buildLikedByGenre(movies: readonly Movie[]): LikedGenreRow[] {
-  const likes = new Map<string, number>();
+function buildGenreLikeSplit(movies: readonly Movie[]): GenreLikeSplit[] {
+  const genres = new Set<string>();
   for (const m of movies) {
-    if (!m.like) continue;
-    for (const g of m.category) {
-      likes.set(g, (likes.get(g) ?? 0) + 1);
-    }
+    for (const g of m.category) genres.add(g);
   }
-  return [...likes.entries()]
-    .map(([genre, likesInGenre]) => ({ genre, likesInGenre }))
-    .sort((a, b) => a.genre.localeCompare(b.genre, undefined, { sensitivity: "base" }));
+  const sorted = [...genres].toSorted((a, b) =>
+    a.localeCompare(b, undefined, { sensitivity: "base" }),
+  );
+  return sorted.map((genre) => {
+    let liked = 0;
+    let notLiked = 0;
+    for (const m of movies) {
+      if (!m.category.includes(genre)) continue;
+      if (m.like) liked += 1;
+      else notLiked += 1;
+    }
+    return { genre, liked, notLiked };
+  });
 }
 
 export type MovieChartsButtonProps = {
@@ -75,20 +82,19 @@ export function MovieChartsButton({ movies, className }: MovieChartsButtonProps)
 
   const genreAggs = useMemo(() => buildGenreRatingAggs(movies), [movies]);
   const overallHist = useMemo(() => buildRatingHistogram(movies), [movies]);
-  const likedRows = useMemo(() => buildLikedByGenre(movies), [movies]);
-  const likedChartData = useMemo(
-    () => likedRows.map((r) => ({ genre: r.genre, likes: r.likesInGenre })),
-    [likedRows],
+  const likeSplitByGenre = useMemo(() => buildGenreLikeSplit(movies), [movies]);
+  const likeSplitChartHeight = Math.min(
+    520,
+    Math.max(220, likeSplitByGenre.length * 36),
   );
-  const likedChartHeight = Math.min(520, Math.max(220, likedChartData.length * 36));
-  const likedYAxisWidth = useMemo(() => {
-    if (likedChartData.length === 0) return 48;
+  const likeSplitYAxisWidth = useMemo(() => {
+    if (likeSplitByGenre.length === 0) return 48;
     let maxChars = 0;
-    for (const row of likedChartData) {
+    for (const row of likeSplitByGenre) {
       if (row.genre.length > maxChars) maxChars = row.genre.length;
     }
     return Math.min(160, Math.max(44, Math.ceil(maxChars * 5.4 + 4)));
-  }, [likedChartData]);
+  }, [likeSplitByGenre]);
 
   const genreNames = useMemo(() => genreAggs.map((r) => r.genre), [genreAggs]);
   const [userGenrePick, setUserGenrePick] = useState<string | null>(null);
@@ -208,7 +214,7 @@ export function MovieChartsButton({ movies, className }: MovieChartsButtonProps)
                         <Bar
                           dataKey="count"
                           name="Titles"
-                          fill="var(--primary)"
+                          fill="var(--chart-bar-fill)"
                           radius={[4, 4, 0, 0]}
                         />
                       </BarChart>
@@ -308,7 +314,7 @@ export function MovieChartsButton({ movies, className }: MovieChartsButtonProps)
                             <Bar
                               dataKey="count"
                               name={`Titles in ${genreForHist}`}
-                              fill="var(--primary)"
+                              fill="var(--chart-bar-fill)"
                               radius={[4, 4, 0, 0]}
                             />
                           </BarChart>
@@ -319,17 +325,20 @@ export function MovieChartsButton({ movies, className }: MovieChartsButtonProps)
                 </section>
 
                 <section className="space-y-3">
-                  <h3 className="text-base font-semibold text-foreground">Likes</h3>
-                  {likedRows.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">
-                      No liked titles, or no categories on liked titles.
-                    </p>
+                  <h3 className="text-base font-semibold text-foreground">Likes by genre</h3>
+                  {movies.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No titles in this list.</p>
+                  ) : likeSplitByGenre.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No genres on these titles.</p>
                   ) : (
-                    <div className="w-full min-w-0" style={{ height: likedChartHeight }}>
+                    <div
+                      className="w-full min-w-0"
+                      style={{ height: likeSplitChartHeight }}
+                    >
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart
                           layout="vertical"
-                          data={likedChartData}
+                          data={likeSplitByGenre}
                           margin={{ top: 8, right: 12, left: 0, bottom: 8 }}
                         >
                           <CartesianGrid
@@ -346,7 +355,7 @@ export function MovieChartsButton({ movies, className }: MovieChartsButtonProps)
                           <YAxis
                             type="category"
                             dataKey="genre"
-                            width={likedYAxisWidth}
+                            width={likeSplitYAxisWidth}
                             tickMargin={2}
                             axisLine={false}
                             tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
@@ -361,9 +370,17 @@ export function MovieChartsButton({ movies, className }: MovieChartsButtonProps)
                             labelStyle={{ color: "var(--foreground)" }}
                           />
                           <Bar
-                            dataKey="likes"
-                            name="Likes in category"
-                            fill="var(--primary)"
+                            dataKey="liked"
+                            stackId="split"
+                            name="Liked"
+                            fill="var(--chart-stack-second)"
+                            radius={[0, 0, 0, 0]}
+                          />
+                          <Bar
+                            dataKey="notLiked"
+                            stackId="split"
+                            name="Not liked"
+                            fill="var(--chart-stack-first)"
                             radius={[0, 4, 4, 0]}
                           />
                         </BarChart>

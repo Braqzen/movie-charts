@@ -3,7 +3,8 @@
     "paths": {
       "lib/*": ["./src/lib/*"],
       "components/*": ["./src/components/*"],
-      "types/*": ["./src/types/*"]
+      "types/*": ["./src/types/*"],
+      "pages/*": ["./src/pages/*"]
     },
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "es2023",

@@ -122,7 +122,7 @@ export function MovieAllUsersRatingDialog({
                   }}
                   labelStyle={{ color: "var(--foreground)" }}
                 />
-                <Bar dataKey="count" name="Count" fill="var(--primary)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" name="Count" fill="var(--chart-bar-fill)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

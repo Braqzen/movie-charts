@@ -29,6 +29,10 @@
   --muted-foreground: #57606a;
   --border: #adb8c6;
   --ring: #0969da;
+  /** Stack: muted-foreground + border. Bar: muted+border mix. */
+  --chart-stack-first: #57606a;
+  --chart-stack-second: #adb8c6;
+  --chart-bar-fill: #d1d8e0;
 }
 
 .dark {
@@ -41,6 +45,10 @@
   --muted-foreground: #aab2c0;
   --border: #4a5568;
   --ring: #f4c542;
+  /** Stack: muted-foreground + border on dark card */
+  --chart-stack-first: #aab2c0;
+  --chart-stack-second: #4a5568;
+  --chart-bar-fill: #7a8394;
 }
 
 @layer base {

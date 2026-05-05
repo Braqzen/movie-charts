@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import type { Movie } from "types/movie";
+import { movieMatchesCategorySelection } from "lib/category-match";
 
 /** all: AND every selected category. any: OR at least one selected category. */
 export type CategoryTagMatchMode = "all" | "any";
@@ -39,19 +40,11 @@ export function useFilteredMovies(
 
       if (selectedCategories.size === 0) return true;
 
-      const tagsOnMovie = movie.category;
-      if (categoryTagMatchMode === "all") {
-        for (const category of selectedCategories) {
-          if (!tagsOnMovie.includes(category)) return false;
-        }
-      } else {
-        const anyHit = [...selectedCategories].some((category) =>
-          tagsOnMovie.includes(category),
-        );
-        if (!anyHit) return false;
-      }
-
-      return true;
+      return movieMatchesCategorySelection(
+        movie.category,
+        selectedCategories,
+        categoryTagMatchMode,
+      );
     });
     return [...matching].sort((a, b) =>
       a.name.localeCompare(b.name, undefined, {

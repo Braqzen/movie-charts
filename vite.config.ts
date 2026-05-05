@@ -15,6 +15,7 @@ export default defineConfig(({ command }) => ({
       "lib/": `${srcDir}/lib/`,
       "components/": `${srcDir}/components/`,
       "types/": `${srcDir}/types/`,
+      "pages/": `${srcDir}/pages/`,
     },
   },
 }));
