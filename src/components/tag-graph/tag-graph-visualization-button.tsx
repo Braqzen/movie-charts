@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Boxes } from "lucide-react";
+import { Boxes, SlidersHorizontal } from "lucide-react";
 import { CategoryFilter } from "components/movies/category-filter";
-import { CategoryMatchModeToggle } from "components/movies/category-match-mode-toggle";
 import { TagGraphScene, type PickPayload } from "components/tag-graph/tag-graph-scene";
 import { buildTagGraphLayout, type TagGraphLayout } from "lib/tag-graph-layout";
-import type { CategoryTagMatchMode } from "lib/use-filtered-movies";
 import { mergeTailwindClasses } from "lib/utils";
 import type { Movie } from "types/movie";
 
@@ -14,8 +12,9 @@ export type TagGraphVisualizationButtonProps = {
   allCategories: readonly string[];
   selectedCategories: ReadonlySet<string>;
   onToggleCategory: (category: string) => void;
-  categoryTagMatchMode: CategoryTagMatchMode;
-  onCategoryTagMatchModeChange: (mode: CategoryTagMatchMode) => void;
+  onOpenFilters: () => void;
+  /** When true, Escape should not close the tag map (filters dialog uses Escape). */
+  filtersOverlayOpen: boolean;
 };
 
 const categoryRowClass =
@@ -44,8 +43,7 @@ function TagSidePanel({
   allCategories,
   selectedCategories,
   onToggleCategory,
-  categoryTagMatchMode,
-  onCategoryTagMatchModeChange,
+  onOpenFilters,
 }: {
   selection: PickPayload;
   layout: TagGraphLayout;
@@ -54,8 +52,7 @@ function TagSidePanel({
   allCategories: readonly string[];
   selectedCategories: ReadonlySet<string>;
   onToggleCategory: (category: string) => void;
-  categoryTagMatchMode: CategoryTagMatchMode;
-  onCategoryTagMatchModeChange: (mode: CategoryTagMatchMode) => void;
+  onOpenFilters: () => void;
 }) {
   if (!selection) {
     return (
@@ -71,12 +68,19 @@ function TagSidePanel({
             onToggle={onToggleCategory}
             className="min-w-0 flex-1 sm:min-w-[12rem]"
           />
-          <CategoryMatchModeToggle
-            value={categoryTagMatchMode}
-            onChange={onCategoryTagMatchModeChange}
-          />
-        </div>
-      </div>
+          <button
+            type="button"
+            onClick={onOpenFilters}
+            className={mergeTailwindClasses(
+              "table-elevated-surface inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-md",
+              "text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            )}
+            aria-label="Open filters"
+            title="Match mode, liked titles, rating range"
+          >
+            <SlidersHorizontal className="size-5" aria-hidden />
+          </button>
+        </div>      </div>
     );
   }
 
@@ -160,8 +164,8 @@ export function TagGraphVisualizationButton({
   allCategories,
   selectedCategories,
   onToggleCategory,
-  categoryTagMatchMode,
-  onCategoryTagMatchModeChange,
+  onOpenFilters,
+  filtersOverlayOpen,
 }: TagGraphVisualizationButtonProps) {
   const [open, setOpen] = useState(false);
   const [selection, setSelection] = useState<PickPayload>(null);
@@ -223,11 +227,14 @@ export function TagGraphVisualizationButton({
   useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeModal();
+      if (event.key === "Escape") {
+        if (filtersOverlayOpen) return;
+        closeModal();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, closeModal]);
+  }, [open, closeModal, filtersOverlayOpen]);
 
   return (
     <>
@@ -276,8 +283,7 @@ export function TagGraphVisualizationButton({
                   allCategories={allCategories}
                   selectedCategories={selectedCategories}
                   onToggleCategory={onToggleCategory}
-                  categoryTagMatchMode={categoryTagMatchMode}
-                  onCategoryTagMatchModeChange={onCategoryTagMatchModeChange}
+                  onOpenFilters={onOpenFilters}
                 />
               </div>
             </aside>

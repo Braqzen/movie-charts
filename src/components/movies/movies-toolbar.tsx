@@ -1,8 +1,7 @@
 import type { ComponentProps } from "react";
+import { SlidersHorizontal } from "lucide-react";
 import { CategoryFilter } from "components/movies/category-filter";
-import { CategoryMatchModeToggle } from "components/movies/category-match-mode-toggle";
 import { MovieSearchField } from "components/movies/movie-search-field";
-import type { CategoryTagMatchMode } from "lib/use-filtered-movies";
 import { mergeTailwindClasses } from "lib/utils";
 
 type MoviesToolbarProps = {
@@ -11,8 +10,7 @@ type MoviesToolbarProps = {
   allCategories: readonly string[];
   selectedCategories: ReadonlySet<string>;
   onToggleCategory: (category: string) => void;
-  categoryTagMatchMode: CategoryTagMatchMode;
-  onCategoryTagMatchModeChange: (mode: CategoryTagMatchMode) => void;
+  onOpenFilters: () => void;
 } & Pick<ComponentProps<"div">, "className">;
 
 export function MoviesToolbar({
@@ -21,8 +19,7 @@ export function MoviesToolbar({
   allCategories,
   selectedCategories,
   onToggleCategory,
-  categoryTagMatchMode,
-  onCategoryTagMatchModeChange,
+  onOpenFilters,
   className,
 }: MoviesToolbarProps) {
   return (
@@ -41,10 +38,19 @@ export function MoviesToolbar({
           selected={selectedCategories}
           onToggle={onToggleCategory}
         />
-        <CategoryMatchModeToggle
-          value={categoryTagMatchMode}
-          onChange={onCategoryTagMatchModeChange}
-        />
+        <button
+          type="button"
+          onClick={onOpenFilters}
+          className={mergeTailwindClasses(
+            "table-elevated-surface inline-flex h-10 shrink-0 cursor-pointer items-center gap-2 rounded-md px-3",
+            "text-sm font-medium text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          )}
+          aria-label="Open filters"
+          title="Match mode, liked titles, rating range"
+        >
+          <SlidersHorizontal className="size-4 shrink-0" aria-hidden />
+          Filters
+        </button>
       </div>
     </div>
   );

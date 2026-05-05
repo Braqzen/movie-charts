@@ -1,0 +1,22 @@
+[
+  {
+    "id": 9,
+    "rating": 3,
+    "like": false
+  },
+  {
+    "id": 56,
+    "rating": 1,
+    "like": false
+  },
+  {
+    "id": 90,
+    "rating": 2,
+    "like": false
+  },
+  {
+    "id": 107,
+    "rating": 3,
+    "like": false
+  }
+]

@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "create-users": "node scripts/create-users.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -18,6 +19,7 @@
     "lucide-react": "1.14.0",
     "react": "19.2.5",
     "react-dom": "19.2.5",
+    "recharts": "3.8.1",
     "tailwind-merge": "3.5.0",
     "tailwindcss": "4.2.4",
     "three": "0.184.0"

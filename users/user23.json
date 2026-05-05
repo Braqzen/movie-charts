@@ -1,0 +1,42 @@
+[
+  {
+    "id": 17,
+    "rating": 0.5,
+    "like": false
+  },
+  {
+    "id": 27,
+    "rating": 0.5,
+    "like": false
+  },
+  {
+    "id": 32,
+    "rating": 4.5,
+    "like": false
+  },
+  {
+    "id": 36,
+    "rating": 4,
+    "like": false
+  },
+  {
+    "id": 71,
+    "rating": 4.5,
+    "like": true
+  },
+  {
+    "id": 95,
+    "rating": 0.5,
+    "like": false
+  },
+  {
+    "id": 100,
+    "rating": 1.5,
+    "like": false
+  },
+  {
+    "id": 104,
+    "rating": 2.5,
+    "like": false
+  }
+]

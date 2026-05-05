@@ -1,0 +1,17 @@
+[
+  {
+    "id": 3,
+    "rating": 3,
+    "like": false
+  },
+  {
+    "id": 80,
+    "rating": 5,
+    "like": true
+  },
+  {
+    "id": 101,
+    "rating": 1.5,
+    "like": false
+  }
+]

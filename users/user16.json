@@ -1,0 +1,202 @@
+[
+  {
+    "id": 1,
+    "rating": 5,
+    "like": false
+  },
+  {
+    "id": 2,
+    "rating": 0.5,
+    "like": false
+  },
+  {
+    "id": 5,
+    "rating": 5,
+    "like": false
+  },
+  {
+    "id": 11,
+    "rating": 0.5,
+    "like": false
+  },
+  {
+    "id": 20,
+    "rating": 3,
+    "like": false
+  },
+  {
+    "id": 21,
+    "rating": 0.5,
+    "like": false
+  },
+  {
+    "id": 24,
+    "rating": 4.5,
+    "like": true
+  },
+  {
+    "id": 27,
+    "rating": 4.5,
+    "like": false
+  },
+  {
+    "id": 30,
+    "rating": 3.5,
+    "like": false
+  },
+  {
+    "id": 31,
+    "rating": 4,
+    "like": false
+  },
+  {
+    "id": 32,
+    "rating": 4,
+    "like": true
+  },
+  {
+    "id": 36,
+    "rating": 5,
+    "like": true
+  },
+  {
+    "id": 41,
+    "rating": 2.5,
+    "like": false
+  },
+  {
+    "id": 44,
+    "rating": 3,
+    "like": false
+  },
+  {
+    "id": 49,
+    "rating": 0.5,
+    "like": false
+  },
+  {
+    "id": 50,
+    "rating": 4,
+    "like": false
+  },
+  {
+    "id": 55,
+    "rating": 2.5,
+    "like": false
+  },
+  {
+    "id": 58,
+    "rating": 1,
+    "like": false
+  },
+  {
+    "id": 60,
+    "rating": 0.5,
+    "like": false
+  },
+  {
+    "id": 62,
+    "rating": 1,
+    "like": false
+  },
+  {
+    "id": 64,
+    "rating": 1,
+    "like": false
+  },
+  {
+    "id": 68,
+    "rating": 1,
+    "like": false
+  },
+  {
+    "id": 69,
+    "rating": 1,
+    "like": false
+  },
+  {
+    "id": 71,
+    "rating": 3,
+    "like": false
+  },
+  {
+    "id": 72,
+    "rating": 1.5,
+    "like": false
+  },
+  {
+    "id": 74,
+    "rating": 1,
+    "like": false
+  },
+  {
+    "id": 79,
+    "rating": 2,
+    "like": false
+  },
+  {
+    "id": 81,
+    "rating": 3,
+    "like": false
+  },
+  {
+    "id": 82,
+    "rating": 3,
+    "like": false
+  },
+  {
+    "id": 88,
+    "rating": 1.5,
+    "like": false
+  },
+  {
+    "id": 89,
+    "rating": 2,
+    "like": false
+  },
+  {
+    "id": 90,
+    "rating": 1.5,
+    "like": false
+  },
+  {
+    "id": 91,
+    "rating": 5,
+    "like": true
+  },
+  {
+    "id": 93,
+    "rating": 1.5,
+    "like": false
+  },
+  {
+    "id": 96,
+    "rating": 2,
+    "like": false
+  },
+  {
+    "id": 97,
+    "rating": 2,
+    "like": false
+  },
+  {
+    "id": 100,
+    "rating": 4,
+    "like": false
+  },
+  {
+    "id": 102,
+    "rating": 2,
+    "like": false
+  },
+  {
+    "id": 104,
+    "rating": 2,
+    "like": false
+  },
+  {
+    "id": 105,
+    "rating": 2.5,
+    "like": false
+  }
+]

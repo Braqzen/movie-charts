@@ -2,12 +2,14 @@ import { Heart } from "lucide-react";
 import type { Movie } from "types/movie";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "components/ui/table";
 import { CategoryBadge } from "components/movies/category-badge";
+import { mergeTailwindClasses } from "lib/utils";
 
 type MoviesTableProps = {
   movies: readonly Movie[];
   emptyLabel?: string;
   selectedCategories: ReadonlySet<string>;
   onToggleCategory: (category: string) => void;
+  onNameCellClick?: (movie: Movie) => void;
 };
 
 export function MoviesTable({
@@ -15,6 +17,7 @@ export function MoviesTable({
   emptyLabel = "No movies match your filters.",
   selectedCategories,
   onToggleCategory,
+  onNameCellClick,
 }: MoviesTableProps) {
   return (
     <Table className="min-w-full table-fixed">
@@ -50,8 +53,23 @@ export function MoviesTable({
               <TableCell className="ps-3 pe-2.5 py-2.5 text-center align-middle tabular-nums font-medium">
                 {index + 1}
               </TableCell>
-              <TableCell className="min-w-0 ps-4 pe-2 py-2.5 align-middle font-medium whitespace-normal">
-                {movie.name}
+              <TableCell className="min-w-0 ps-4 pe-2 py-2.5 align-middle whitespace-normal">
+                {onNameCellClick ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onNameCellClick(movie);
+                    }}
+                    className={mergeTailwindClasses(
+                      "max-w-full cursor-pointer rounded-sm text-left font-medium text-foreground",
+                      "hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    )}
+                  >
+                    {movie.name}
+                  </button>
+                ) : (
+                  <span className="font-medium">{movie.name}</span>
+                )}
               </TableCell>
               <TableCell className="px-2 py-2.5 !text-center align-middle tabular-nums">
                 {movie.rating}

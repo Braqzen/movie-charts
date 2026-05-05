@@ -1,0 +1,112 @@
+[
+  {
+    "id": 10,
+    "rating": 0.5,
+    "like": false
+  },
+  {
+    "id": 12,
+    "rating": 3.5,
+    "like": false
+  },
+  {
+    "id": 14,
+    "rating": 4.5,
+    "like": false
+  },
+  {
+    "id": 16,
+    "rating": 4,
+    "like": false
+  },
+  {
+    "id": 28,
+    "rating": 0.5,
+    "like": false
+  },
+  {
+    "id": 29,
+    "rating": 2.5,
+    "like": false
+  },
+  {
+    "id": 31,
+    "rating": 0.5,
+    "like": false
+  },
+  {
+    "id": 35,
+    "rating": 4.5,
+    "like": false
+  },
+  {
+    "id": 39,
+    "rating": 4.5,
+    "like": false
+  },
+  {
+    "id": 51,
+    "rating": 4,
+    "like": false
+  },
+  {
+    "id": 56,
+    "rating": 1,
+    "like": false
+  },
+  {
+    "id": 58,
+    "rating": 3,
+    "like": false
+  },
+  {
+    "id": 63,
+    "rating": 1,
+    "like": false
+  },
+  {
+    "id": 64,
+    "rating": 4.5,
+    "like": false
+  },
+  {
+    "id": 67,
+    "rating": 5,
+    "like": false
+  },
+  {
+    "id": 68,
+    "rating": 4,
+    "like": false
+  },
+  {
+    "id": 71,
+    "rating": 1.5,
+    "like": false
+  },
+  {
+    "id": 85,
+    "rating": 4,
+    "like": false
+  },
+  {
+    "id": 97,
+    "rating": 4.5,
+    "like": true
+  },
+  {
+    "id": 99,
+    "rating": 2,
+    "like": false
+  },
+  {
+    "id": 100,
+    "rating": 1,
+    "like": false
+  },
+  {
+    "id": 107,
+    "rating": 1.5,
+    "like": false
+  }
+]

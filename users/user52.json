@@ -1,0 +1,182 @@
+[
+  {
+    "id": 1,
+    "rating": 5,
+    "like": false
+  },
+  {
+    "id": 4,
+    "rating": 2.5,
+    "like": false
+  },
+  {
+    "id": 5,
+    "rating": 1.5,
+    "like": false
+  },
+  {
+    "id": 6,
+    "rating": 3,
+    "like": false
+  },
+  {
+    "id": 10,
+    "rating": 0.5,
+    "like": false
+  },
+  {
+    "id": 11,
+    "rating": 2.5,
+    "like": false
+  },
+  {
+    "id": 23,
+    "rating": 4,
+    "like": true
+  },
+  {
+    "id": 24,
+    "rating": 3,
+    "like": false
+  },
+  {
+    "id": 25,
+    "rating": 0.5,
+    "like": false
+  },
+  {
+    "id": 30,
+    "rating": 1.5,
+    "like": false
+  },
+  {
+    "id": 32,
+    "rating": 4,
+    "like": true
+  },
+  {
+    "id": 34,
+    "rating": 4.5,
+    "like": true
+  },
+  {
+    "id": 35,
+    "rating": 1,
+    "like": false
+  },
+  {
+    "id": 41,
+    "rating": 4,
+    "like": false
+  },
+  {
+    "id": 42,
+    "rating": 1.5,
+    "like": false
+  },
+  {
+    "id": 45,
+    "rating": 0.5,
+    "like": false
+  },
+  {
+    "id": 47,
+    "rating": 2.5,
+    "like": false
+  },
+  {
+    "id": 49,
+    "rating": 0.5,
+    "like": false
+  },
+  {
+    "id": 53,
+    "rating": 1.5,
+    "like": false
+  },
+  {
+    "id": 58,
+    "rating": 1.5,
+    "like": false
+  },
+  {
+    "id": 61,
+    "rating": 1,
+    "like": false
+  },
+  {
+    "id": 62,
+    "rating": 2,
+    "like": false
+  },
+  {
+    "id": 63,
+    "rating": 4,
+    "like": false
+  },
+  {
+    "id": 65,
+    "rating": 5,
+    "like": true
+  },
+  {
+    "id": 83,
+    "rating": 2,
+    "like": false
+  },
+  {
+    "id": 86,
+    "rating": 1,
+    "like": false
+  },
+  {
+    "id": 87,
+    "rating": 3,
+    "like": false
+  },
+  {
+    "id": 88,
+    "rating": 0.5,
+    "like": false
+  },
+  {
+    "id": 89,
+    "rating": 4,
+    "like": true
+  },
+  {
+    "id": 90,
+    "rating": 1.5,
+    "like": false
+  },
+  {
+    "id": 95,
+    "rating": 2.5,
+    "like": false
+  },
+  {
+    "id": 97,
+    "rating": 4.5,
+    "like": false
+  },
+  {
+    "id": 98,
+    "rating": 5,
+    "like": true
+  },
+  {
+    "id": 102,
+    "rating": 5,
+    "like": false
+  },
+  {
+    "id": 103,
+    "rating": 3.5,
+    "like": false
+  },
+  {
+    "id": 104,
+    "rating": 5,
+    "like": true
+  }
+]
