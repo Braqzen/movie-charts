@@ -10,7 +10,6 @@ import {
   USER_BUNDLES,
   catalogById,
 } from "lib/app-data";
-import { mergeTailwindClasses } from "lib/utils";
 import { userRowsToMovies } from "lib/user-movie-data";
 import {
   useFilteredMovies,
@@ -21,7 +20,6 @@ import type { Movie } from "types/movie";
 
 type ProfilePageProps = {
   activeSlug: string;
-  onActiveSlugChange: (slug: string) => void;
 };
 
 function moviesForSlug(slug: string): Movie[] {
@@ -30,7 +28,7 @@ function moviesForSlug(slug: string): Movie[] {
   return userRowsToMovies(bundle.rows, catalogById);
 }
 
-export function ProfilePage({ activeSlug, onActiveSlugChange }: ProfilePageProps) {
+export function ProfilePage({ activeSlug }: ProfilePageProps) {
   const movies = useMemo(() => moviesForSlug(activeSlug), [activeSlug]);
 
   const [query, setQuery] = useState("");
@@ -89,31 +87,6 @@ export function ProfilePage({ activeSlug, onActiveSlugChange }: ProfilePageProps
       />
       <div className="mx-auto flex min-h-0 w-full max-w-[min(118rem,calc(100vw-1rem))] flex-1 flex-col gap-4 px-3 py-4 sm:px-6 sm:py-6">
         <section aria-label="Search and filters" className="shrink-0 px-1 sm:px-0">
-          <header className="mb-4 flex flex-wrap items-center justify-between gap-3 sm:mb-5">
-            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Profile</h1>
-            {USER_BUNDLES.length > 0 ? (
-              <label className="flex shrink-0 items-center gap-2 text-sm">
-                <span className="text-muted-foreground">User</span>
-                <select
-                  className={mergeTailwindClasses(
-                    "table-elevated-surface h-10 min-w-[8rem] rounded-md px-3 text-sm text-foreground outline-none",
-                    "focus-visible:ring-2 focus-visible:ring-ring",
-                  )}
-                  value={activeSlug}
-                  onChange={(e) => {
-                    onActiveSlugChange(e.target.value);
-                  }}
-                  aria-label="Active user"
-                >
-                  {USER_BUNDLES.map((u) => (
-                    <option key={u.slug} value={u.slug}>
-                      {u.slug}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ) : null}
-          </header>
           <div className="flex w-full shrink-0 flex-col gap-4 sm:flex-row sm:items-end">
             <MoviesToolbar
               className="min-w-0 w-full sm:flex-1"

@@ -2,24 +2,23 @@ import { useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "components/app-layout";
 import { USER_BUNDLES } from "lib/app-data";
-import { HomePage } from "pages/home-page";
+import { GenreBreakdownPage } from "pages/genre-breakdown-page";
 import { ProfilePage } from "pages/profile-page";
+import { TopMoviesPage } from "pages/top-movies-page";
 
 export default function App() {
   const [activeSlug, setActiveSlug] = useState(() => USER_BUNDLES[0]?.slug ?? "");
 
   return (
     <BrowserRouter>
-      <AppLayout>
+      <AppLayout activeSlug={activeSlug} onActiveSlugChange={setActiveSlug}>
         <Routes>
-          <Route path="/" element={<HomePage activeSlug={activeSlug} />} />
-          <Route
-            path="/profile"
-            element={
-              <ProfilePage activeSlug={activeSlug} onActiveSlugChange={setActiveSlug} />
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/" element={<Navigate to="/top-movies" replace />} />
+          <Route path="/top-movies" element={<TopMoviesPage activeSlug={activeSlug} />} />
+          <Route path="/genre-breakdown" element={<GenreBreakdownPage activeSlug={activeSlug} />} />
+          <Route path="/catalogue" element={<ProfilePage activeSlug={activeSlug} />} />
+          <Route path="/profile" element={<Navigate to="/catalogue" replace />} />
+          <Route path="*" element={<Navigate to="/top-movies" replace />} />
         </Routes>
       </AppLayout>
     </BrowserRouter>
