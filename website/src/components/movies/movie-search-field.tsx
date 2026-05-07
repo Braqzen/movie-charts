@@ -6,6 +6,8 @@ type MovieSearchFieldProps = {
   onChange: (value: string) => void;
   label?: string;
   placeholder?: string;
+  disabled?: boolean;
+  title?: string;
 };
 
 export function MovieSearchField({
@@ -14,12 +16,15 @@ export function MovieSearchField({
   onChange,
   label,
   placeholder = "Search by name",
+  disabled = false,
+  title,
 }: MovieSearchFieldProps) {
   const inputClassName = mergeTailwindClasses(
     "table-elevated-surface h-10 w-full min-w-0 rounded-md px-3 text-sm",
     "placeholder:text-muted-foreground outline-none",
     "selection:bg-muted-foreground/20 selection:text-foreground dark:selection:bg-muted-foreground/15",
     "focus-visible:border-muted-foreground/62 focus-visible:ring-2 focus-visible:ring-muted-foreground/30 dark:focus-visible:border-muted-foreground/52 dark:focus-visible:ring-muted-foreground/25",
+    disabled && "cursor-not-allowed opacity-60",
   );
 
   return (
@@ -39,6 +44,8 @@ export function MovieSearchField({
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
             className={inputClassName}
+            disabled={disabled}
+            title={title}
           />
         </label>
       ) : (
@@ -50,6 +57,8 @@ export function MovieSearchField({
           placeholder={placeholder}
           aria-label="Search movies"
           className={inputClassName}
+          disabled={disabled}
+          title={title}
         />
       )}
     </div>

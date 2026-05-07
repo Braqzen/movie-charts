@@ -7,6 +7,8 @@ import { mergeTailwindClasses } from "lib/utils";
 type MoviesToolbarProps = {
   query: string;
   onQueryChange: (value: string) => void;
+  searchDisabled?: boolean;
+  searchDisabledTitle?: string;
   allCategories: readonly string[];
   selectedCategories: ReadonlySet<string>;
   onToggleCategory: (category: string) => void;
@@ -16,6 +18,8 @@ type MoviesToolbarProps = {
 export function MoviesToolbar({
   query,
   onQueryChange,
+  searchDisabled = false,
+  searchDisabledTitle = "No titles to search yet",
   allCategories,
   selectedCategories,
   onToggleCategory,
@@ -30,7 +34,12 @@ export function MoviesToolbar({
       )}
     >
       <div className="min-w-0 max-w-5xl flex-1">
-        <MovieSearchField value={query} onChange={onQueryChange} />
+        <MovieSearchField
+          value={query}
+          onChange={onQueryChange}
+          disabled={searchDisabled}
+          title={searchDisabled ? searchDisabledTitle : undefined}
+        />
       </div>
       <div className="flex flex-wrap items-end gap-2">
         <CategoryFilter

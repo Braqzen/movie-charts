@@ -7,7 +7,11 @@ use crate::{
     },
 };
 use eyre::Result;
-use sea_orm::{ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter};
+use sea_orm::{
+    ActiveValue::Set,
+    ColumnTrait, EntityTrait, QueryFilter,
+    sea_query::{Expr, extension::postgres::PgExpr},
+};
 use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
@@ -24,8 +28,7 @@ impl Database {
             title: Set(title),
             genres: Set(genres),
         })
-        .on_conflict_do_nothing()
-        .exec_without_returning(&self.connection)
+        .exec(&self.connection)
         .await?;
 
         Ok(())
@@ -38,7 +41,7 @@ impl Database {
 
     pub async fn search_movies(&self, query: &str) -> Result<Vec<MovieWithGenres>> {
         let movies = Movies::find()
-            .filter(Column::Title.contains(query))
+            .filter(Expr::col(Column::Title).ilike(format!("%{}%", query)))
             .all(&self.connection)
             .await?;
 

@@ -1,48 +1,63 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "components/app-layout";
 import { UserAccountDialog } from "components/user-account-dialog";
-import { listUsersViaApi } from "lib/user-api";
+import { UserSessionProvider } from "components/user-session-provider";
+import { listUsersViaApi, type UserResponse } from "lib/user-api";
 import { GenreBreakdownPage } from "pages/genre-breakdown-page";
 import { ProfilePage } from "pages/profile-page";
 import { TopMoviesPage } from "pages/top-movies-page";
 
 const KNOWN_KEY = "movie-charts-known-users";
-const ACTIVE_KEY = "movie-charts-active-user";
+const REMEMBER_KEY = "movie-charts-remembered-session";
 
-function readKnownUsers(): string[] {
-  if (typeof window === "undefined") return [];
+type RememberedSession = {
+  userId: number;
+  username: string;
+};
+
+function readRememberedSession(): RememberedSession | null {
+  if (typeof window === "undefined") return null;
   try {
-    const raw = localStorage.getItem(KNOWN_KEY);
-    if (raw == null) return [];
+    const raw = localStorage.getItem(REMEMBER_KEY);
+    if (raw == null) return null;
     const parsed: unknown = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter((x): x is string => typeof x === "string" && x.trim() !== "");
+    if (typeof parsed !== "object" || parsed === null) return null;
+    const o = parsed as Record<string, unknown>;
+    const userId = o.userId;
+    const username = o.username;
+    if (typeof userId !== "number" || userId <= 0) return null;
+    if (typeof username !== "string" || username.trim() === "") return null;
+    return { userId, username: username.trim() };
   } catch {
-    return [];
-  }
-}
-
-function readActiveUsername(): string {
-  if (typeof window === "undefined") return "";
-  try {
-    const v = localStorage.getItem(ACTIVE_KEY);
-    return typeof v === "string" ? v : "";
-  } catch {
-    return "";
+    return null;
   }
 }
 
 export default function App() {
-  const [knownUsers, setKnownUsers] = useState<string[]>(readKnownUsers);
-  const [activeUsername, setActiveUsername] = useState<string>(readActiveUsername);
-  const [userDialogOpen, setUserDialogOpen] = useState(false);
+  const rememberedOnBoot = typeof window !== "undefined" ? readRememberedSession() : null;
+  const [knownUsers, setKnownUsers] = useState<UserResponse[]>([]);
+  const [userId, setUserId] = useState<number | null>(() => rememberedOnBoot?.userId ?? null);
+  const [username, setUsername] = useState(() => rememberedOnBoot?.username ?? "");
+  const [userDialogOpen, setUserDialogOpen] = useState(() => rememberedOnBoot == null);
   const [userDialogKey, setUserDialogKey] = useState(0);
+
+  const userIdRef = useRef(userId);
+  userIdRef.current = userId;
 
   useEffect(() => {
     let cancelled = false;
     void listUsersViaApi().then((users) => {
-      if (!cancelled && users.length > 0) setKnownUsers(users);
+      if (cancelled) return;
+      if (users === null) return;
+      setKnownUsers(users);
+      const id = userIdRef.current;
+      if (id != null && !users.some((u) => u.id === id)) {
+        localStorage.removeItem(REMEMBER_KEY);
+        setUserId(null);
+        setUsername("");
+        setUserDialogOpen(true);
+      }
     });
     return () => {
       cancelled = true;
@@ -50,49 +65,52 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const sorted = [...new Set(knownUsers)].toSorted((a, b) =>
-      a.localeCompare(b, undefined, { sensitivity: "base" }),
-    );
-    localStorage.setItem(KNOWN_KEY, JSON.stringify(sorted));
+    localStorage.setItem(KNOWN_KEY, JSON.stringify(knownUsers));
   }, [knownUsers]);
 
-  useEffect(() => {
-    if (activeUsername.trim() !== "") localStorage.setItem(ACTIVE_KEY, activeUsername);
-    else localStorage.removeItem(ACTIVE_KEY);
-  }, [activeUsername]);
-
-  const onSelectUser = useCallback((username: string) => {
-    setActiveUsername(username.trim());
+  const onSessionCommit = useCallback((user: UserResponse, rememberMe: boolean) => {
+    setUserId(user.id);
+    setUsername(user.username);
+    setUserDialogOpen(false);
+    if (rememberMe) {
+      localStorage.setItem(
+        REMEMBER_KEY,
+        JSON.stringify({ userId: user.id, username: user.username } satisfies RememberedSession),
+      );
+    } else {
+      localStorage.removeItem(REMEMBER_KEY);
+    }
   }, []);
 
   return (
     <BrowserRouter>
-      <AppLayout
-        activeUsername={activeUsername}
-        onOpenUserDialog={() => {
-          setUserDialogKey((k) => k + 1);
-          setUserDialogOpen(true);
-        }}
-      >
-        <Routes>
-          <Route path="/" element={<Navigate to="/top-movies" replace />} />
-          <Route path="/top-movies" element={<TopMoviesPage />} />
-          <Route path="/genre-breakdown" element={<GenreBreakdownPage />} />
-          <Route path="/catalogue" element={<ProfilePage />} />
-          <Route path="/profile" element={<Navigate to="/catalogue" replace />} />
-          <Route path="*" element={<Navigate to="/top-movies" replace />} />
-        </Routes>
-      </AppLayout>
+      <UserSessionProvider value={{ userId, username }}>
+        <AppLayout
+          activeUsername={username}
+          onOpenUserDialog={() => {
+            setUserDialogKey((k) => k + 1);
+            setUserDialogOpen(true);
+          }}
+        >
+          <Routes>
+            <Route path="/" element={<Navigate to="/top-movies" replace />} />
+            <Route path="/top-movies" element={<TopMoviesPage />} />
+            <Route path="/genre-breakdown" element={<GenreBreakdownPage />} />
+            <Route path="/catalogue" element={<ProfilePage />} />
+            <Route path="/profile" element={<Navigate to="/catalogue" replace />} />
+            <Route path="*" element={<Navigate to="/top-movies" replace />} />
+          </Routes>
+        </AppLayout>
+      </UserSessionProvider>
       <UserAccountDialog
-        key={userDialogKey}
+        key={`${userDialogKey}-${knownUsers.map((u) => u.id).join(",")}`}
         open={userDialogOpen}
         onOpenChange={setUserDialogOpen}
         knownUsers={knownUsers}
-        activeUsername={activeUsername}
-        onSelectUser={onSelectUser}
         onKnownUsersChange={(users) => {
           setKnownUsers([...users]);
         }}
+        onSessionCommit={onSessionCommit}
       />
     </BrowserRouter>
   );

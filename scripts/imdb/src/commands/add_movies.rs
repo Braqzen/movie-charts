@@ -25,10 +25,6 @@ pub struct AddMovies {
     /// movie_ids_DD_MM_YYYY.json
     #[arg(long, required = true)]
     pub file: PathBuf,
-
-    /// Apply changes to the database
-    #[arg(long)]
-    pub apply: bool,
 }
 
 impl AddMovies {
@@ -57,21 +53,13 @@ impl AddMovies {
                 // If invalid then skip so we do not query imdb
                 match database.invalid_movie(movie.id).await {
                     Ok(true) => continue,
-                    Ok(false) => {}
-                    Err(error) => {
-                        eprintln!("Invalid Movie: {} - {:?}", movie.id, error);
-                        continue;
-                    }
+                    _ => {}
                 }
 
-                // If exists in db then skip so we do not query imdb
+                // If movie already exists then skip so we do not query imdb
                 match database.movie(movie.id).await {
-                    Ok(Some(_movie)) => continue,
-                    Ok(None) => {}
-                    Err(error) => {
-                        eprintln!("Movie: {} - {:?}", movie.id, error);
-                        continue;
-                    }
+                    Ok(Some(_)) => continue,
+                    _ => {}
                 }
 
                 sleep(TMDB_REQUEST_DELAY).await;
@@ -103,7 +91,15 @@ impl AddMovies {
                             )
                             .await
                         {
-                            eprintln!("Error adding movie {}: {error:?}", movie.id);
+                            let message = error.to_string();
+                            if message.contains("duplicate key value") {
+                                // Fallback message in case we error'd on the initial check
+                                eprintln!("Skipping duplicate: {} - {}", movie.id, details.title);
+                                continue;
+                            }
+
+                            eprintln!("Error adding movie {}: {message}", movie.id);
+                            continue;
                         }
 
                         println!("Added movie: {} - {}", movie.id, details.title);
@@ -126,14 +122,6 @@ impl AddMovies {
                 eprintln!("Error reading line: {:?}", line.err());
             }
         }
-
-        // // If save to disk
-        // if self.apply {
-        //     println!("\n--- Not Implemented ---\n",);
-        // } else {
-        //     // Dry run by only displaying what's about to be saved without saving to disk
-        //     println!("\n--- Not Implemented ---\n");
-        // }
 
         Ok(())
     }

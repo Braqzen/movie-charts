@@ -7,6 +7,8 @@ import { mergeTailwindClasses } from "lib/utils";
 type MoviesTableProps = {
   movies: readonly Movie[];
   emptyLabel?: string;
+  /** When true and there are no rows, render header only with an empty body. */
+  bareEmpty?: boolean;
   selectedCategories: ReadonlySet<string>;
   onToggleCategory: (category: string) => void;
   onNameCellClick?: (movie: Movie) => void;
@@ -15,6 +17,7 @@ type MoviesTableProps = {
 export function MoviesTable({
   movies,
   emptyLabel = "No movies match your filters.",
+  bareEmpty = false,
   selectedCategories,
   onToggleCategory,
   onNameCellClick,
@@ -39,11 +42,13 @@ export function MoviesTable({
       </TableHeader>
       <TableBody>
         {movies.length === 0 ? (
-          <TableRow>
-            <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
-              {emptyLabel}
-            </TableCell>
-          </TableRow>
+          bareEmpty ? null : (
+            <TableRow>
+              <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                {emptyLabel}
+              </TableCell>
+            </TableRow>
+          )
         ) : (
           movies.map((movie, index) => (
             <TableRow

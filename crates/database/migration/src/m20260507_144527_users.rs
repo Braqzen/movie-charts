@@ -50,9 +50,11 @@ impl MigrationTrait for Migration {
             .create_index(
                 Index::create()
                     .if_not_exists()
+                    .unique()
                     .table(Ratings::Table)
                     .col(Ratings::UserId)
-                    .name("user_id_index")
+                    .col(Ratings::MovieId)
+                    .name("ratings_user_movie_unique_index")
                     .to_owned(),
             )
             .await?;

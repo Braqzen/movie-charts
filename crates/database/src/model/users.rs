@@ -14,6 +14,7 @@ use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
 pub struct UserMovieRating {
+    pub movie_id: i32,
     pub movie_title: String,
     pub genres: Vec<String>,
     pub rating: Decimal,
@@ -83,6 +84,7 @@ impl Database {
             .filter_map(|rating| {
                 let movie = movies.get(&rating.movie_id)?;
                 Some(UserMovieRating {
+                    movie_id: rating.movie_id,
                     movie_title: movie.title.clone(),
                     genres: movie
                         .genres

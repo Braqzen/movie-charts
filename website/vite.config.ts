@@ -25,6 +25,8 @@ export default defineConfig({
       "components/": `${srcDir}/components/`,
       "types/": `${srcDir}/types/`,
       "pages/": `${srcDir}/pages/`,
+      "contexts/": `${srcDir}/contexts/`,
+      "hooks/": `${srcDir}/hooks/`,
     },
   },
 });

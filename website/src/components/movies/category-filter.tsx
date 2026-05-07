@@ -24,6 +24,22 @@ export function CategoryFilter({ categories, selected, onToggle, className }: Ca
     return () => document.removeEventListener("pointerdown", onPointerDown);
   }, [open]);
 
+  if (categories.length === 0) {
+    return (
+      <div
+        className={mergeTailwindClasses(
+          "table-elevated-surface flex h-10 list-none items-center rounded-md px-3 text-sm text-muted-foreground",
+          "pointer-events-none opacity-60 sm:w-64",
+          className,
+        )}
+        aria-label="Filter by category"
+        title="No categories yet"
+      >
+        Filter by category
+      </div>
+    );
+  }
+
   return (
     <div
       ref={containerRef}

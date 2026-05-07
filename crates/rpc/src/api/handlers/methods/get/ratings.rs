@@ -34,6 +34,7 @@ impl Parameters {
 
 #[derive(Debug, Serialize)]
 pub struct RatingResponse {
+    pub movie_id: i32,
     pub title: String,
     pub genres: Vec<String>,
     pub rating: String,
@@ -55,6 +56,7 @@ pub async fn user_ratings_handler(
             ratings
                 .into_iter()
                 .map(|rating| RatingResponse {
+                    movie_id: rating.movie_id,
                     title: rating.movie_title,
                     genres: rating.genres,
                     rating: rating.rating.to_string(),

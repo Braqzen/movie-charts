@@ -1,11 +1,8 @@
-/** Shared catalog and temp ratings snapshot. */
+/** Shared catalog for genre pages (legacy movies list). */
 import moviesData from "../../movies.json";
-import ratingsData from "../../ratings.json";
-import { buildCatalogById, type MovieCatalogRow, type UserRow } from "lib/user-movie-data";
+import { type MovieCatalogRow } from "lib/user-movie-data";
 
-export const TEMP_RATINGS_ROWS = ratingsData as UserRow[];
 export const MOVIES_CATALOG = moviesData as MovieCatalogRow[];
-export const catalogById = buildCatalogById(MOVIES_CATALOG);
 
 export function allCatalogCategories(): string[] {
   const unique = new Set<string>();
