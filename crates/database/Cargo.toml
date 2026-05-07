@@ -1,0 +1,14 @@
+[package]
+name = "database"
+authors.workspace = true
+edition.workspace = true
+readme.workspace = true
+license.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[dependencies]
+eyre.workspace = true
+migration.path = "./migration"
+sea-orm.workspace = true
+sqlx = { version = "0.8", features = ["postgres", "runtime-tokio-rustls"], default-features = false }

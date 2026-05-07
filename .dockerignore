@@ -1,0 +1,6 @@
+.git
+.cursor
+target
+website/node_modules
+website/dist
+**/*.md

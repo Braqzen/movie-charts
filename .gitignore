@@ -11,6 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
+target
+movie_ids*.json
 
 # Editor directories and files
 .vscode/*

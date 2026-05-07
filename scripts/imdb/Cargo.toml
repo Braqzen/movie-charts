@@ -1,0 +1,17 @@
+[package]
+name = "imdb"
+authors.workspace = true
+edition.workspace = true
+readme.workspace = true
+license.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[dependencies]
+clap.workspace = true
+database.path = "../../crates/database"
+eyre.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
