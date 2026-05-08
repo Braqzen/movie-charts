@@ -116,7 +116,7 @@ impl Database {
         let mut query = Movies::find().filter(matching_pair_conditions);
         // An empty exclusion list does not change results, so skip adding a pointless predicate.
         if !excluded_movie_ids.is_empty() {
-            // Rated movies are not recommendations, so remove them before scoring candidates.
+            // Remove excluded ids (caller decides, e.g. dismiss low ratings) before scoring.
             query = query.filter(Column::Id.is_not_in(excluded_movie_ids));
         }
 

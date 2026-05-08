@@ -64,14 +64,15 @@ pub async fn recommendations_handler(
         }
     };
 
-    let liked_rating_floor = Decimal::from(4);
+    let four = Decimal::from(4);
     let excluded_movie_ids = ratings
         .iter()
+        .filter(|rating| !rating.like && rating.rating < four)
         .map(|rating| rating.movie_id)
         .collect::<Vec<_>>();
     let genre_ids = ratings
         .iter()
-        .filter(|rating| rating.like || rating.rating > liked_rating_floor)
+        .filter(|rating| rating.like || rating.rating >= four)
         .flat_map(|rating| rating.genre_ids.iter().copied())
         .collect::<HashSet<_>>()
         .into_iter()
