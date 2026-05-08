@@ -7,7 +7,8 @@ use crate::{
 };
 use eyre::Result;
 use sea_orm::{
-    ActiveValue::NotSet, ActiveValue::Set, EntityTrait, prelude::Decimal, sea_query::OnConflict,
+    ActiveValue::NotSet, ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter, prelude::Decimal,
+    sea_query::OnConflict,
 };
 
 impl Database {
@@ -34,5 +35,15 @@ impl Database {
         .await?;
 
         Ok(row.id)
+    }
+
+    pub async fn delete_rating(&self, user_id: i32, movie_id: i32) -> Result<u64> {
+        let result = Ratings::delete_many()
+            .filter(Column::UserId.eq(user_id))
+            .filter(Column::MovieId.eq(movie_id))
+            .exec(&self.connection)
+            .await?;
+
+        Ok(result.rows_affected)
     }
 }

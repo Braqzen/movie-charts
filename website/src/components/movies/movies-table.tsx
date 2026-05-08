@@ -12,6 +12,10 @@ type MoviesTableProps = {
   selectedCategories: ReadonlySet<string>;
   onToggleCategory: (category: string) => void;
   onNameCellClick?: (movie: Movie) => void;
+  /** First column ranks start at rankOffset + 1 (for pagination). */
+  rankOffset?: number;
+  /** Recommendations: no rating or like columns. */
+  variant?: "catalog" | "recommendations";
 };
 
 export function MoviesTable({
@@ -21,22 +25,31 @@ export function MoviesTable({
   selectedCategories,
   onToggleCategory,
   onNameCellClick,
+  rankOffset = 0,
+  variant = "catalog",
 }: MoviesTableProps) {
+  const recs = variant === "recommendations";
+  const colSpan = recs ? 3 : 5;
+
   return (
     <Table className="min-w-full table-fixed">
       <colgroup>
         <col style={{ width: "3%" }} />
-        <col style={{ width: "56%" }} />
-        <col style={{ width: "5%" }} />
-        <col style={{ width: "4%" }} />
-        <col style={{ width: "32%" }} />
+        <col style={{ width: recs ? "57%" : "56%" }} />
+        {!recs ? <col style={{ width: "5%" }} /> : null}
+        {!recs ? <col style={{ width: "4%" }} /> : null}
+        <col style={{ width: recs ? "40%" : "32%" }} />
       </colgroup>
       <TableHeader className="sticky top-0 z-[1] [&_th]:bg-card [&_th]:h-auto [&_th]:min-h-10 [&_th]:py-3 [&_th]:text-xs [&_th]:font-semibold [&_th]:uppercase [&_th]:tracking-wider [&_th]:text-muted-foreground">
         <TableRow className="border-b-2 border-foreground/16 hover:bg-transparent dark:border-foreground/22 [&_th:not(:first-child)]:border-l [&_th:not(:first-child)]:border-foreground/14 dark:[&_th:not(:first-child)]:border-foreground/20">
           <TableHead className="ps-3 pe-2.5 text-center tabular-nums">#</TableHead>
           <TableHead className="min-w-0 ps-4 pe-2">Name</TableHead>
-          <TableHead className="px-2 !text-center tabular-nums">Rating</TableHead>
-          <TableHead className="px-2 text-center">Like</TableHead>
+          {!recs ? (
+            <>
+              <TableHead className="px-2 !text-center tabular-nums">Rating</TableHead>
+              <TableHead className="px-2 text-center">Like</TableHead>
+            </>
+          ) : null}
           <TableHead className="min-w-0 ps-4 pe-2">Genre</TableHead>
         </TableRow>
       </TableHeader>
@@ -44,7 +57,7 @@ export function MoviesTable({
         {movies.length === 0 ? (
           bareEmpty ? null : (
             <TableRow>
-              <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+              <TableCell colSpan={colSpan} className="h-24 text-center text-muted-foreground">
                 {emptyLabel}
               </TableCell>
             </TableRow>
@@ -56,7 +69,7 @@ export function MoviesTable({
               className="[&_td:not(:first-child)]:border-l [&_td:not(:first-child)]:border-foreground/14 dark:[&_td:not(:first-child)]:border-foreground/20 transition-colors"
             >
               <TableCell className="ps-3 pe-2.5 py-2.5 text-center align-middle tabular-nums font-medium">
-                {index + 1}
+                {rankOffset + index + 1}
               </TableCell>
               <TableCell className="min-w-0 ps-4 pe-2 py-2.5 align-middle whitespace-normal">
                 {onNameCellClick ? (
@@ -76,18 +89,22 @@ export function MoviesTable({
                   <span className="font-medium">{movie.name}</span>
                 )}
               </TableCell>
-              <TableCell className="px-2 py-2.5 !text-center align-middle tabular-nums">
-                {movie.rating}
-              </TableCell>
-              <TableCell className="px-2 py-2.5 text-center align-middle">
-                {movie.like ? (
-                  <Heart
-                    className="mx-auto size-5 text-destructive"
-                    fill="currentColor"
-                    aria-label="Liked"
-                  />
-                ) : null}
-              </TableCell>
+              {!recs ? (
+                <>
+                  <TableCell className="px-2 py-2.5 !text-center align-middle tabular-nums">
+                    {movie.rating}
+                  </TableCell>
+                  <TableCell className="px-2 py-2.5 text-center align-middle">
+                    {movie.like ? (
+                      <Heart
+                        className="mx-auto size-5 text-destructive"
+                        fill="currentColor"
+                        aria-label="Liked"
+                      />
+                    ) : null}
+                  </TableCell>
+                </>
+              ) : null}
               <TableCell className="min-w-0 ps-4 pe-2 py-2.5 align-middle">
                 <div className="flex flex-wrap items-center gap-2">
                   {[...movie.category]

@@ -1,6 +1,12 @@
+import { Trash2 } from "lucide-react";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { mergeTailwindClasses } from "lib/utils";
-import { postRatingViaApi, searchMoviesViaApi, type SearchMovieRow } from "lib/user-api";
+import {
+  deleteRatingViaApi,
+  postRatingViaApi,
+  searchMoviesViaApi,
+  type SearchMovieRow,
+} from "lib/user-api";
 import { MovieSearchField } from "components/movies/movie-search-field";
 
 const overlayButton = "absolute inset-0 bg-background/55 backdrop-blur-md dark:bg-background/65";
@@ -33,6 +39,7 @@ export function RateMovieDialog({
   const [like, setLike] = useState(() => initialMovie?.like ?? false);
   const [submitBusy, setSubmitBusy] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [deleteBusy, setDeleteBusy] = useState(false);
 
   const closeModal = useCallback(() => {
     onOpenChange(false);
@@ -125,6 +132,21 @@ export function RateMovieDialog({
     [closeModal, like, onSaved, ratingInput, selected, userId],
   );
 
+  const onDeleteRating = useCallback(async () => {
+    if (selected == null) return;
+    setSubmitError(null);
+    setDeleteBusy(true);
+    try {
+      await deleteRatingViaApi({ userId, movieId: selected.id });
+      onSaved();
+      closeModal();
+    } catch (e) {
+      setSubmitError(e instanceof Error ? e.message : "Delete failed.");
+    } finally {
+      setDeleteBusy(false);
+    }
+  }, [closeModal, onSaved, selected, userId]);
+
   if (!open) return null;
 
   return (
@@ -205,34 +227,23 @@ export function RateMovieDialog({
               </ul>
             </div>
           ) : (
-            <form
-              onSubmit={onSubmitRating}
-              className="flex min-h-0 flex-1 flex-col"
-            >
-              <div className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0">
-                  <p className="text-lg font-semibold leading-tight text-foreground">
-                    {selected.title}
-                  </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {selected.genres.length === 0 ? "No genres" : selected.genres.join(", ")}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelected(null);
-                    setSubmitError(null);
-                  }}
-                  className="shrink-0 self-start rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  Change movie
-                </button>
-              </div>
-              <div className="flex flex-col gap-4 py-5 sm:flex-row sm:items-end">
-                <label className="text-sm text-muted-foreground">
-                  Rating (0 to 5)
+            <form onSubmit={onSubmitRating} className="flex min-h-0 flex-1 flex-col gap-5">
+              <header className="shrink-0 space-y-1">
+                <p className="text-lg font-semibold leading-tight text-foreground sm:text-xl">
+                  {selected.title}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {selected.genres.length === 0 ? "No genres" : selected.genres.join(", ")}
+                </p>
+              </header>
+
+              <div className="flex min-h-0 flex-1 flex-col gap-5">
+                <div className="flex w-full flex-col gap-2">
+                  <label htmlFor="rate-value" className="text-sm font-medium text-foreground">
+                    Rating
+                  </label>
                   <input
+                    id="rate-value"
                     type="number"
                     name="rating"
                     min={0}
@@ -241,38 +252,60 @@ export function RateMovieDialog({
                     value={ratingInput}
                     onChange={(e) => setRatingInput(e.target.value)}
                     className={mergeTailwindClasses(
-                      "mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-foreground sm:w-48",
+                      "h-11 w-full rounded-md border border-border bg-background px-3 text-base tabular-nums text-foreground",
                       "outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     )}
-                    disabled={submitBusy}
+                    disabled={submitBusy || deleteBusy}
                   />
-                </label>
-                <label className="flex h-10 cursor-pointer items-center gap-2 text-sm text-foreground">
+                </div>
+
+                <label className="flex w-full cursor-pointer items-center gap-3 text-sm text-foreground">
                   <input
                     type="checkbox"
                     checked={like}
                     onChange={(e) => setLike(e.target.checked)}
-                    disabled={submitBusy}
+                    disabled={submitBusy || deleteBusy}
+                    className="size-4 rounded border-border accent-primary"
                   />
                   Like
                 </label>
+
+                {submitError != null ? (
+                  <p className="text-sm text-destructive" role="alert">
+                    {submitError}
+                  </p>
+                ) : null}
               </div>
-              {submitError != null ? (
-                <p className="text-sm text-destructive" role="alert">
-                  {submitError}
-                </p>
-              ) : null}
-              <button
-                type="submit"
-                disabled={submitBusy}
-                className={mergeTailwindClasses(
-                  "mt-auto shrink-0 table-elevated-surface h-10 w-full rounded-md text-sm font-medium text-foreground sm:max-w-xs",
-                  "hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  "disabled:pointer-events-none disabled:opacity-50",
-                )}
-              >
-                {submitBusy ? "Saving..." : "Save rating"}
-              </button>
+
+              <div className="mt-auto flex shrink-0 w-full flex-col gap-3">
+                <button
+                  type="submit"
+                  disabled={submitBusy || deleteBusy}
+                  className={mergeTailwindClasses(
+                    "h-11 w-full rounded-md text-sm font-semibold text-foreground",
+                    "table-elevated-surface hover:bg-muted",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    "disabled:pointer-events-none disabled:opacity-50",
+                  )}
+                >
+                  {deleteBusy ? "Deleting..." : submitBusy ? "Saving..." : "Save rating"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void onDeleteRating();
+                  }}
+                  disabled={submitBusy || deleteBusy}
+                  className={mergeTailwindClasses(
+                    "inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-destructive/50 bg-transparent px-3 text-sm font-medium text-destructive",
+                    "hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    "disabled:pointer-events-none disabled:opacity-40",
+                  )}
+                >
+                  <Trash2 className="size-4 shrink-0" aria-hidden />
+                  Delete rating
+                </button>
+              </div>
             </form>
           )}
         </div>

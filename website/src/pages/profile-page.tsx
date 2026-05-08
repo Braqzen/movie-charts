@@ -178,7 +178,7 @@ export function ProfilePage() {
           <div className="hide-scrollbar min-h-0 flex-1 overflow-auto px-3 pb-4 pt-2 sm:px-5 sm:pb-5 sm:pt-3">
             {username === "" ? (
               <p className="px-1 py-6 text-center text-sm text-muted-foreground sm:px-0">
-                Select a user to load your catalogue.
+                Select a user to load your catalog.
               </p>
             ) : null}
             <MoviesTable

@@ -66,6 +66,13 @@ impl MigrationTrait for Migration {
             )
             .await?;
 
+        manager
+            .get_connection()
+            .execute_unprepared(
+                "CREATE INDEX IF NOT EXISTS idx_movies_genres_gin ON movies USING gin (genres)",
+            )
+            .await?;
+
         Ok(())
     }
 

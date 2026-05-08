@@ -15,6 +15,7 @@ export function useFilteredMovies(
   likedFilter: LikedFilter,
   minRating: number,
   maxRating: number,
+  options?: { skipLikedAndRatingFilters?: boolean },
 ) {
   const allCategories = useMemo(() => {
     const unique = new Set<string>();
@@ -35,8 +36,10 @@ export function useFilteredMovies(
       if (searchQueryLowercase) {
         if (!movie.name.toLowerCase().includes(searchQueryLowercase)) return false;
       }
-      if (likedFilter === "liked" && !movie.like) return false;
-      if (movie.rating < lo || movie.rating > hi) return false;
+      if (!options?.skipLikedAndRatingFilters) {
+        if (likedFilter === "liked" && !movie.like) return false;
+        if (movie.rating < lo || movie.rating > hi) return false;
+      }
 
       if (selectedCategories.size === 0) return true;
 
@@ -59,6 +62,7 @@ export function useFilteredMovies(
     likedFilter,
     minRating,
     maxRating,
+    options?.skipLikedAndRatingFilters,
   ]);
 
   return { allCategories, filteredMovies };

@@ -22,6 +22,13 @@ export type SearchMovieRow = {
   genres: string[];
 };
 
+export type RecommendationApiRow = {
+  id: number;
+  title: string;
+  genres: string[];
+  match_count: number;
+};
+
 function sortUsers(users: readonly UserResponse[]): UserResponse[] {
   return [...users].toSorted((a, b) =>
     a.username.localeCompare(b.username, undefined, { sensitivity: "base" }),
@@ -85,6 +92,44 @@ export async function searchMoviesViaApi(query: string): Promise<SearchMovieRow[
     throw new Error(text.includes("<html>") ? `Request failed (${res.status})` : text);
   }
   return (await res.json()) as SearchMovieRow[];
+}
+
+export async function fetchRecommendationsViaApi(userId: number): Promise<RecommendationApiRow[]> {
+  const res = await fetch(
+    `/api/recommendations?user_id=${encodeURIComponent(String(userId))}`,
+  );
+  if (!res.ok) {
+    const text = await res.text().catch(() => res.statusText);
+    throw new Error(text.includes("<html>") ? `Request failed (${res.status})` : text);
+  }
+  return (await res.json()) as RecommendationApiRow[];
+}
+
+export async function fetchCatalogGenreCounts(): Promise<Record<string, number>> {
+  const res = await fetch("/api/catalog/genre-counts");
+  if (!res.ok) {
+    const text = await res.text().catch(() => res.statusText);
+    throw new Error(text.includes("<html>") ? `Request failed (${res.status})` : text);
+  }
+  return (await res.json()) as Record<string, number>;
+}
+
+export async function deleteRatingViaApi(input: {
+  userId: number;
+  movieId: number;
+}): Promise<void> {
+  const params = new URLSearchParams({
+    user_id: String(input.userId),
+    movie_id: String(input.movieId),
+  });
+  const res = await fetch(`/api/ratings?${params.toString()}`, { method: "DELETE" });
+  if (res.status === 404) {
+    throw new Error("Rating not found.");
+  }
+  if (!res.ok) {
+    const text = await res.text().catch(() => res.statusText);
+    throw new Error(text.includes("<html>") ? `Request failed (${res.status})` : text);
+  }
 }
 
 export async function postRatingViaApi(input: {

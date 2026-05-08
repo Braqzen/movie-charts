@@ -16,6 +16,7 @@ use std::collections::HashMap;
 pub struct UserMovieRating {
     pub movie_id: i32,
     pub movie_title: String,
+    pub genre_ids: Vec<i32>,
     pub genres: Vec<String>,
     pub rating: Decimal,
     pub like: bool,
@@ -86,6 +87,7 @@ impl Database {
                 Some(UserMovieRating {
                     movie_id: rating.movie_id,
                     movie_title: movie.title.clone(),
+                    genre_ids: movie.genres.clone(),
                     genres: movie
                         .genres
                         .iter()

@@ -4,9 +4,9 @@ import { AppLayout } from "components/app-layout";
 import { UserAccountDialog } from "components/user-account-dialog";
 import { UserSessionProvider } from "components/user-session-provider";
 import { listUsersViaApi, type UserResponse } from "lib/user-api";
-import { GenreBreakdownPage } from "pages/genre-breakdown-page";
+import { DatabasePage } from "pages/database-page";
 import { ProfilePage } from "pages/profile-page";
-import { TopMoviesPage } from "pages/top-movies-page";
+import { RecommendationsPage } from "pages/recommendations-page";
 
 const KNOWN_KEY = "movie-charts-known-users";
 const REMEMBER_KEY = "movie-charts-remembered-session";
@@ -93,12 +93,14 @@ export default function App() {
           }}
         >
           <Routes>
-            <Route path="/" element={<Navigate to="/top-movies" replace />} />
-            <Route path="/top-movies" element={<TopMoviesPage />} />
-            <Route path="/genre-breakdown" element={<GenreBreakdownPage />} />
+            <Route path="/" element={<Navigate to="/catalogue" replace />} />
             <Route path="/catalogue" element={<ProfilePage />} />
+            <Route path="/recommendations" element={<RecommendationsPage />} />
+            <Route path="/database" element={<DatabasePage />} />
+            <Route path="/genre-breakdown" element={<Navigate to="/database" replace />} />
+            <Route path="/top-movies" element={<Navigate to="/recommendations" replace />} />
             <Route path="/profile" element={<Navigate to="/catalogue" replace />} />
-            <Route path="*" element={<Navigate to="/top-movies" replace />} />
+            <Route path="*" element={<Navigate to="/catalogue" replace />} />
           </Routes>
         </AppLayout>
       </UserSessionProvider>

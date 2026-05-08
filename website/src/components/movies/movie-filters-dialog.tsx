@@ -15,6 +15,8 @@ export type MovieFiltersDialogProps = {
   maxRating: number;
   onMinRatingChange: (value: number) => void;
   onMaxRatingChange: (value: number) => void;
+  /** Hide liked and rating filters (recommendations page). */
+  categoriesOnly?: boolean;
 };
 
 export function MovieFiltersDialog({
@@ -28,6 +30,7 @@ export function MovieFiltersDialog({
   maxRating,
   onMinRatingChange,
   onMaxRatingChange,
+  categoriesOnly = false,
 }: MovieFiltersDialogProps) {
   const titleId = useId();
 
@@ -74,7 +77,7 @@ export function MovieFiltersDialog({
       >
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3 sm:px-5">
           <h2 id={titleId} className="text-lg font-semibold text-foreground">
-            Filters
+            {categoriesOnly ? "Category filters" : "Filters"}
           </h2>
           <button
             type="button"
@@ -98,18 +101,20 @@ export function MovieFiltersDialog({
                 onChange={onCategoryTagMatchModeChange}
               />
             </section>
-            <section className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">Liked and rating</h3>
-              <LikedRatingFilters
-                likedFilter={likedFilter}
-                onLikedFilterChange={onLikedFilterChange}
-                minRating={minRating}
-                maxRating={maxRating}
-                onMinRatingChange={onMinRatingChange}
-                onMaxRatingChange={onMaxRatingChange}
-                className="flex-col items-stretch sm:flex-row sm:flex-wrap sm:items-center"
-              />
-            </section>
+            {categoriesOnly ? null : (
+              <section className="space-y-3">
+                <h3 className="text-sm font-semibold text-foreground">Liked and rating</h3>
+                <LikedRatingFilters
+                  likedFilter={likedFilter}
+                  onLikedFilterChange={onLikedFilterChange}
+                  minRating={minRating}
+                  maxRating={maxRating}
+                  onMinRatingChange={onMinRatingChange}
+                  onMaxRatingChange={onMaxRatingChange}
+                  className="flex-col items-stretch sm:flex-row sm:flex-wrap sm:items-center"
+                />
+              </section>
+            )}
           </div>
         </div>
       </div>

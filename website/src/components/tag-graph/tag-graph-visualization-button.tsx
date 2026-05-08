@@ -6,6 +6,13 @@ import { buildTagGraphLayout, type TagGraphLayout } from "lib/tag-graph-layout";
 import { mergeTailwindClasses } from "lib/utils";
 import type { Movie } from "types/movie";
 
+export type RecommendationMatchLevelControl = {
+  value: "all" | number;
+  onChange: (value: "all" | number) => void;
+  levels: readonly number[];
+  matchCountByMovieId: ReadonlyMap<number, number>;
+};
+
 export type TagGraphVisualizationButtonProps = {
   className?: string;
   filteredMovies: readonly Movie[];
@@ -15,6 +22,10 @@ export type TagGraphVisualizationButtonProps = {
   onOpenFilters: () => void;
   /** When true, Escape should not close the tag map (filters dialog uses Escape). */
   filtersOverlayOpen: boolean;
+  /** When true, hide rating and liked filter entry (recommendations mode). */
+  filterSimplified?: boolean;
+  /** When set, filter 3D layout by genre match count and show control in the side panel. */
+  recommendationMatchLevel?: RecommendationMatchLevelControl;
 };
 
 const categoryRowClass =
@@ -44,6 +55,8 @@ function TagSidePanel({
   selectedCategories,
   onToggleCategory,
   onOpenFilters,
+  filterSimplified,
+  recommendationMatchLevel,
 }: {
   selection: PickPayload;
   layout: TagGraphLayout;
@@ -53,6 +66,8 @@ function TagSidePanel({
   selectedCategories: ReadonlySet<string>;
   onToggleCategory: (category: string) => void;
   onOpenFilters: () => void;
+  filterSimplified: boolean;
+  recommendationMatchLevel: RecommendationMatchLevelControl | null;
 }) {
   if (!selection) {
     return (
@@ -61,26 +76,70 @@ function TagSidePanel({
           Drag to rotate, zoom with the wheel, click a label to inspect. Escape or click outside
           exits.
         </p>
-        <div className="flex shrink-0 flex-wrap items-end gap-2 text-foreground">
-          <CategoryFilter
-            categories={allCategories}
-            selected={selectedCategories}
-            onToggle={onToggleCategory}
-            className="min-w-0 flex-1 sm:min-w-[12rem]"
-          />
-          <button
-            type="button"
-            onClick={onOpenFilters}
-            className={mergeTailwindClasses(
-              "table-elevated-surface inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-md",
-              "text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-            )}
-            aria-label="Open filters"
-            title="Match mode, liked titles, rating range"
-          >
-            <SlidersHorizontal className="size-5" aria-hidden />
-          </button>
-        </div>      </div>
+        <div
+          className={mergeTailwindClasses(
+            "flex shrink-0 items-end gap-2 text-foreground",
+            recommendationMatchLevel != null ? "w-full flex-row flex-nowrap" : "flex-wrap",
+          )}
+        >
+          {recommendationMatchLevel != null ? (
+            <div className="min-w-0 flex-1 basis-0">
+              <CategoryFilter
+                categories={allCategories}
+                selected={selectedCategories}
+                onToggle={onToggleCategory}
+                className="w-full min-w-0 sm:w-full"
+              />
+            </div>
+          ) : (
+            <CategoryFilter
+              categories={allCategories}
+              selected={selectedCategories}
+              onToggle={onToggleCategory}
+              className="min-w-0 flex-1 sm:min-w-[12rem]"
+            />
+          )}
+          {recommendationMatchLevel != null ? (
+            <select
+              aria-label="Match level"
+              value={
+                recommendationMatchLevel.value === "all"
+                  ? "all"
+                  : String(recommendationMatchLevel.value)
+              }
+              onChange={(e) => {
+                const v = e.target.value;
+                recommendationMatchLevel.onChange(v === "all" ? "all" : Number(v));
+              }}
+              className={mergeTailwindClasses(
+                "h-10 w-[9.5rem] shrink-0 rounded-md border border-border bg-background px-2 text-sm text-foreground",
+                "outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              )}
+            >
+              <option value="all">All levels</option>
+              {recommendationMatchLevel.levels.map((n) => (
+                <option key={n} value={String(n)}>
+                  {n} {n === 1 ? "genre" : "genres"}
+                </option>
+              ))}
+            </select>
+          ) : null}
+          {filterSimplified ? null : (
+            <button
+              type="button"
+              onClick={onOpenFilters}
+              className={mergeTailwindClasses(
+                "table-elevated-surface inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-md",
+                "text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              )}
+              aria-label="Open filters"
+              title="Match mode, liked titles, rating range"
+            >
+              <SlidersHorizontal className="size-5" aria-hidden />
+            </button>
+          )}
+        </div>
+      </div>
     );
   }
 
@@ -166,12 +225,28 @@ export function TagGraphVisualizationButton({
   onToggleCategory,
   onOpenFilters,
   filtersOverlayOpen,
+  filterSimplified = false,
+  recommendationMatchLevel,
 }: TagGraphVisualizationButtonProps) {
   const [open, setOpen] = useState(false);
   const [selection, setSelection] = useState<PickPayload>(null);
   const sidePanelWrapRef = useRef<HTMLDivElement>(null);
 
-  const layout = useMemo(() => buildTagGraphLayout(filteredMovies), [filteredMovies]);
+  const moviesForLayout = useMemo(() => {
+    if (recommendationMatchLevel == null) return filteredMovies;
+    const { value, matchCountByMovieId } = recommendationMatchLevel;
+    if (value === "all") return filteredMovies;
+    return filteredMovies.filter((m) => matchCountByMovieId.get(m.id) === value);
+  }, [filteredMovies, recommendationMatchLevel]);
+
+  const layout = useMemo(() => buildTagGraphLayout(moviesForLayout), [moviesForLayout]);
+
+  const matchLevelKey =
+    recommendationMatchLevel == null ? "" : String(recommendationMatchLevel.value);
+
+  useEffect(() => {
+    setSelection(null);
+  }, [matchLevelKey]);
 
   const displaySelection = useMemo(() => activePick(selection, layout), [selection, layout]);
 
@@ -284,6 +359,8 @@ export function TagGraphVisualizationButton({
                   selectedCategories={selectedCategories}
                   onToggleCategory={onToggleCategory}
                   onOpenFilters={onOpenFilters}
+                  filterSimplified={filterSimplified}
+                  recommendationMatchLevel={recommendationMatchLevel ?? null}
                 />
               </div>
             </aside>
