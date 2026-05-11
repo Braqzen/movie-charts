@@ -547,11 +547,16 @@
   {
     "name": "Elevation",
     "id": 110,
-    "categories": ["horror", "action", "mystery"]
+    "categories": ["thriller", "action", "science fiction"]
   },
   {
     "name": "Cloverfield",
     "id": 111,
-    "categories": ["horror", "action", "science fiction"]
+    "categories": ["horror", "thriller", "action", "science fiction"]
+  },
+  {
+    "name": "Captive State",
+    "id": 112,
+    "categories": ["action", "thriller", "science fiction"]
   }
 ]
