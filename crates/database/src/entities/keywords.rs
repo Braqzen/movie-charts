@@ -3,26 +3,17 @@
 use sea_orm::entity::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
-#[sea_orm(table_name = "users")]
+#[sea_orm(table_name = "keywords")]
 pub struct Model {
-    #[sea_orm(primary_key)]
+    #[sea_orm(primary_key, auto_increment = false)]
     pub id: i32,
-    #[sea_orm(unique)]
-    pub username: String,
+    pub title: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::ratings::Entity")]
-    Ratings,
     #[sea_orm(has_many = "super::user_keywords::Entity")]
     UserKeywords,
-}
-
-impl Related<super::ratings::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Ratings.def()
-    }
 }
 
 impl Related<super::user_keywords::Entity> for Entity {
@@ -31,12 +22,12 @@ impl Related<super::user_keywords::Entity> for Entity {
     }
 }
 
-impl Related<super::keywords::Entity> for Entity {
+impl Related<super::users::Entity> for Entity {
     fn to() -> RelationDef {
-        super::user_keywords::Relation::Keywords.def()
+        super::user_keywords::Relation::Users.def()
     }
     fn via() -> Option<RelationDef> {
-        Some(super::user_keywords::Relation::Users.def().rev())
+        Some(super::user_keywords::Relation::Keywords.def().rev())
     }
 }
 

@@ -2,6 +2,8 @@
 
 pub use super::genres::Entity as Genres;
 pub use super::invalid_movies::Entity as InvalidMovies;
+pub use super::keywords::Entity as Keywords;
 pub use super::movies::Entity as Movies;
 pub use super::ratings::Entity as Ratings;
+pub use super::user_keywords::Entity as UserKeywords;
 pub use super::users::Entity as Users;

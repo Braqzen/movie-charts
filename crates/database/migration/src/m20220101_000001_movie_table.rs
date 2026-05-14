@@ -19,6 +19,7 @@ impl MigrationTrait for Migration {
                     )
                     .col(string(Movies::Title))
                     .col(array(Movies::Genres, ColumnType::Integer))
+                    .col(array(Movies::Keywords, ColumnType::Integer))
                     .to_owned(),
             )
             .await?;
@@ -35,6 +36,22 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     .col(string(Genres::Title))
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(Keywords::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(Keywords::Id)
+                            .integer()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    .col(string(Keywords::Title))
                     .to_owned(),
             )
             .await?;
@@ -73,6 +90,13 @@ impl MigrationTrait for Migration {
             )
             .await?;
 
+        manager
+            .get_connection()
+            .execute_unprepared(
+                "CREATE INDEX IF NOT EXISTS idx_movies_keywords_gin ON movies USING gin (keywords)",
+            )
+            .await?;
+
         Ok(())
     }
 
@@ -83,6 +107,10 @@ impl MigrationTrait for Migration {
 
         manager
             .drop_table(Table::drop().table(Genres::Table).to_owned())
+            .await?;
+
+        manager
+            .drop_table(Table::drop().table(Keywords::Table).to_owned())
             .await?;
 
         manager
@@ -103,6 +131,7 @@ pub enum Movies {
     Id,
     Title,
     Genres,
+    Keywords,
 }
 
 /// Information about genres we want to store
@@ -110,6 +139,14 @@ pub enum Movies {
 /// A genre consists of an ID and a name such as "Adventure"
 #[derive(DeriveIden)]
 enum Genres {
+    Table,
+    Id,
+    Title,
+}
+
+/// Keyword catalog (TMDB keyword id and name)
+#[derive(DeriveIden)]
+pub enum Keywords {
     Table,
     Id,
     Title,

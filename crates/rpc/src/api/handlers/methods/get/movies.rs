@@ -40,6 +40,7 @@ pub struct MovieResponse {
     pub id: i32,
     pub title: String,
     pub genres: Vec<String>,
+    pub keywords: Vec<String>,
 }
 
 #[axum::debug_handler]
@@ -60,6 +61,7 @@ pub async fn search_movies_handler(
                     id: movie.id,
                     title: movie.title,
                     genres: movie.genres,
+                    keywords: movie.keywords,
                 })
                 .collect::<Vec<_>>(),
         )

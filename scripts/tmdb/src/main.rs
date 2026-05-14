@@ -2,7 +2,7 @@ mod cli;
 mod client;
 mod commands;
 
-use crate::client::ImdbClient;
+use crate::client::TmdbClient;
 use clap::Parser;
 use cli::Cli;
 use database::Database;
@@ -29,13 +29,13 @@ async fn main() -> Result<()> {
     });
 
     let database_url = std::env::var("DATABASE_URL")?;
-    let imdb_api_key = std::env::var("IMDB_API_KEY")?;
+    let tmdb_api_key = std::env::var("TMDB_API_KEY")?;
 
     let database = Database::new(&database_url).await?;
-    let imdb_client = ImdbClient::new(&imdb_api_key);
+    let tmdb_client = TmdbClient::new(&tmdb_api_key);
 
     match cli {
-        Cli::AddMovies(command) => command.run(&database, &imdb_client, shutdown).await?,
+        Cli::AddMovies(command) => command.run(&database, &tmdb_client, shutdown).await?,
     }
 
     Ok(())

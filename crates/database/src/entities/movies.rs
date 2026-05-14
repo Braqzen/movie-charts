@@ -9,6 +9,7 @@ pub struct Model {
     pub id: i32,
     pub title: String,
     pub genres: Vec<i32>,
+    pub keywords: Vec<i32>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

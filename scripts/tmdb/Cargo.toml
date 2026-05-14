@@ -1,5 +1,5 @@
 [package]
-name = "imdb"
+name = "tmdb"
 authors.workspace = true
 edition.workspace = true
 readme.workspace = true

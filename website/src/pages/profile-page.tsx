@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { MoviesTable } from "components/movies/movies-table";
+import { EditMovieRatingDialog } from "components/movies/edit-movie-rating-dialog";
 import { MovieFiltersDialog } from "components/movies/movie-filters-dialog";
 import { MoviesToolbar } from "components/movies/movies-toolbar";
 import { RateMovieDialog } from "components/movies/rate-movie-dialog";
@@ -103,23 +104,33 @@ export function ProfilePage() {
         onMinRatingChange={setMinRating}
         onMaxRatingChange={setMaxRating}
       />
+      {userId != null && rateInitialMovie != null ? (
+        <EditMovieRatingDialog
+          key={`edit-${rateInitialMovie.id}-${rateDialogKey}`}
+          open={rateDialogOpen}
+          onOpenChange={(open) => {
+            setRateDialogOpen(open);
+            if (!open) setRateInitialMovie(null);
+          }}
+          userId={userId}
+          movie={{
+            id: rateInitialMovie.id,
+            title: rateInitialMovie.name,
+            genres: rateInitialMovie.category,
+            rating: rateInitialMovie.rating,
+            like: rateInitialMovie.like,
+          }}
+          onSaved={() => {
+            void reloadRatings();
+          }}
+        />
+      ) : null}
       {userId != null ? (
         <RateMovieDialog
           key={rateDialogKey}
-          open={rateDialogOpen}
+          open={rateDialogOpen && rateInitialMovie == null}
           onOpenChange={setRateDialogOpen}
           userId={userId}
-          initialMovie={
-            rateInitialMovie == null
-              ? undefined
-              : {
-                  id: rateInitialMovie.id,
-                  title: rateInitialMovie.name,
-                  genres: rateInitialMovie.category,
-                  rating: rateInitialMovie.rating,
-                  like: rateInitialMovie.like,
-                }
-          }
           onSaved={() => {
             void reloadRatings();
           }}

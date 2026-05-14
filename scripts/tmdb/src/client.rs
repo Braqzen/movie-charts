@@ -2,12 +2,12 @@ use reqwest::header::ACCEPT;
 use reqwest::{Client, StatusCode};
 use serde::Deserialize;
 
-pub struct ImdbClient {
+pub struct TmdbClient {
     client: Client,
     api_key: String,
 }
 
-impl ImdbClient {
+impl TmdbClient {
     pub fn new(api_key: &str) -> Self {
         Self {
             client: Client::new(),
@@ -19,6 +19,7 @@ impl ImdbClient {
         let response = match self
             .client
             .get(format!("https://api.themoviedb.org/3/movie/{id}"))
+            .query(&[("append_to_response", "keywords")])
             .header(ACCEPT, "application/json")
             .bearer_auth(self.api_key.trim())
             .send()
@@ -33,7 +34,7 @@ impl ImdbClient {
             return QueryResult::BadStatus(status);
         }
 
-        match response.json::<ImdbMovie>().await {
+        match response.json::<TmdbMovie>().await {
             Err(error) => {
                 if error.is_decode() {
                     QueryResult::DeserializeFailed(error)
@@ -53,16 +54,30 @@ pub enum QueryResult {
     ClientFailed(reqwest::Error),
     /// Received a response with non-success HTTP status (4xx / 5xx).
     BadStatus(StatusCode),
-    /// JSON body existed but failed to deserialize into [`ImdbMovie`].
+    /// JSON body existed but failed to deserialize into [`TmdbMovie`].
     DeserializeFailed(reqwest::Error),
     /// Successfully received a usable movie.
-    Movie(ImdbMovie),
+    Movie(TmdbMovie),
 }
 
 #[derive(Clone, Debug, Deserialize)]
-pub struct ImdbMovie {
+pub struct TmdbMovie {
     pub title: String,
     pub genres: Vec<Genre>,
+    #[serde(default)]
+    pub keywords: TmdbKeywordsContainer,
+}
+
+/// Nested value when using `append_to_response=keywords` on movie details.
+#[derive(Clone, Debug, Default, Deserialize)]
+pub struct TmdbKeywordsContainer {
+    pub keywords: Vec<Keyword>,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct Keyword {
+    pub id: i32,
+    pub name: String,
 }
 
 #[derive(Clone, Debug, Deserialize)]

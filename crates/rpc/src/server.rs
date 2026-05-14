@@ -1,8 +1,9 @@
 use crate::{
     api::{
-        catalog_genre_counts_handler, delete_rating_handler, insert_rating_handler,
-        insert_user_handler, not_found, recommendations_handler, search_movies_handler,
-        user_ratings_handler, users_handler,
+        catalog_genre_counts_handler, catalog_keywords_handler, delete_rating_handler,
+        delete_user_keyword_handler, insert_rating_handler, insert_user_handler,
+        insert_user_keyword_handler, list_user_keywords_handler, not_found, recommendations_handler,
+        search_movies_handler, user_ratings_handler, users_handler,
     },
     state::State,
 };
@@ -50,6 +51,13 @@ impl Server {
                     )
                     .route("/movies/search", get(search_movies_handler))
                     .route("/catalog/genre-counts", get(catalog_genre_counts_handler))
+                    .route("/catalog/keywords", get(catalog_keywords_handler))
+                    .route(
+                        "/user-keywords",
+                        get(list_user_keywords_handler)
+                            .post(insert_user_keyword_handler)
+                            .delete(delete_user_keyword_handler),
+                    )
                     .route("/recommendations", get(recommendations_handler))
                     .fallback(not_found)
                     .with_state(state.clone()),

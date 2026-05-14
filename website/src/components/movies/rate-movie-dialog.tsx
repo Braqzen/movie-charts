@@ -1,45 +1,31 @@
-import { Trash2 } from "lucide-react";
+import { Heart } from "lucide-react";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { mergeTailwindClasses } from "lib/utils";
-import {
-  deleteRatingViaApi,
-  postRatingViaApi,
-  searchMoviesViaApi,
-  type SearchMovieRow,
-} from "lib/user-api";
+import { postRatingViaApi, searchMoviesViaApi, type SearchMovieRow } from "lib/user-api";
 import { MovieSearchField } from "components/movies/movie-search-field";
 
-const overlayButton = "absolute inset-0 bg-background/55 backdrop-blur-md dark:bg-background/65";
+const overlayButton =
+  "absolute inset-0 cursor-pointer bg-background/55 backdrop-blur-md dark:bg-background/65";
 
 type RateMovieDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userId: number;
   onSaved: () => void;
-  initialMovie?: SearchMovieRow & { rating: number; like: boolean };
 };
 
-export function RateMovieDialog({
-  open,
-  onOpenChange,
-  userId,
-  onSaved,
-  initialMovie,
-}: RateMovieDialogProps) {
+export function RateMovieDialog({ open, onOpenChange, userId, onSaved }: RateMovieDialogProps) {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [results, setResults] = useState<SearchMovieRow[]>([]);
   const [loadedForQuery, setLoadedForQuery] = useState("");
   const [searchBusy, setSearchBusy] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
-  const [selected, setSelected] = useState<SearchMovieRow | null>(() => initialMovie ?? null);
-  const [ratingInput, setRatingInput] = useState(() =>
-    initialMovie == null ? "3" : String(initialMovie.rating),
-  );
-  const [like, setLike] = useState(() => initialMovie?.like ?? false);
+  const [selected, setSelected] = useState<SearchMovieRow | null>(null);
+  const [ratingInput, setRatingInput] = useState("3");
+  const [like, setLike] = useState(false);
   const [submitBusy, setSubmitBusy] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [deleteBusy, setDeleteBusy] = useState(false);
 
   const closeModal = useCallback(() => {
     onOpenChange(false);
@@ -61,6 +47,20 @@ export function RateMovieDialog({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, closeModal]);
+
+  useEffect(() => {
+    if (!open) return;
+    setQuery("");
+    setDebouncedQuery("");
+    setResults([]);
+    setLoadedForQuery("");
+    setSearchBusy(false);
+    setSearchError(null);
+    setSelected(null);
+    setRatingInput("3");
+    setLike(false);
+    setSubmitError(null);
+  }, [open]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedQuery(query.trim()), 300);
@@ -132,22 +132,9 @@ export function RateMovieDialog({
     [closeModal, like, onSaved, ratingInput, selected, userId],
   );
 
-  const onDeleteRating = useCallback(async () => {
-    if (selected == null) return;
-    setSubmitError(null);
-    setDeleteBusy(true);
-    try {
-      await deleteRatingViaApi({ userId, movieId: selected.id });
-      onSaved();
-      closeModal();
-    } catch (e) {
-      setSubmitError(e instanceof Error ? e.message : "Delete failed.");
-    } finally {
-      setDeleteBusy(false);
-    }
-  }, [closeModal, onSaved, selected, userId]);
-
   if (!open) return null;
+
+  const searchPhase = selected == null;
 
   return (
     <div
@@ -157,21 +144,25 @@ export function RateMovieDialog({
       <button
         type="button"
         className={overlayButton}
-        aria-label="Close rate movie dialog"
+        aria-label="Close add rating dialog"
         onClick={closeModal}
       />
       <div
         className={mergeTailwindClasses(
-          "table-elevated-surface relative z-10 flex w-[min(98vw,72rem)] flex-col overflow-hidden rounded-xl shadow-lg",
-          "h-[min(88dvh,52rem)] max-h-[calc(100dvh-2rem)] sm:max-h-[calc(100dvh-3rem)]",
+          "table-elevated-surface relative z-10 flex flex-col overflow-hidden rounded-xl shadow-lg",
+          searchPhase
+            ? "w-[min(98vw,72rem)] h-[min(88dvh,52rem)] max-h-[calc(100dvh-2rem)] sm:max-h-[calc(100dvh-3rem)]"
+            : "w-[min(96vw,26rem)] max-h-[min(90dvh,38rem)]",
         )}
         role="dialog"
         aria-modal="true"
-        aria-label="Rate a movie"
+        aria-label={
+          searchPhase ? "Search the movie database to add a title" : "Set rating for selected title"
+        }
       >
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3 sm:px-6">
           <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
-            Rate movie
+            Add to catalog
           </h2>
           <button
             type="button"
@@ -181,11 +172,16 @@ export function RateMovieDialog({
             Close
           </button>
         </div>
-        <div className="hide-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
-          {selected == null ? (
+
+        <div
+          className={mergeTailwindClasses(
+            "hide-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto",
+            searchPhase ? "px-4 py-4 sm:px-6 sm:py-5" : "px-4 py-4",
+          )}
+        >
+          {searchPhase ? (
             <div className="flex min-h-0 flex-1 flex-col gap-6">
-              <section className="shrink-0 space-y-3" aria-label="Find a movie">
-                <h3 className="text-sm font-semibold text-foreground">Find a movie</h3>
+              <div className="shrink-0 space-y-3">
                 <MovieSearchField
                   id="rate-movie-search"
                   value={query}
@@ -200,7 +196,7 @@ export function RateMovieDialog({
                     {searchError}
                   </p>
                 ) : null}
-              </section>
+              </div>
               <ul className="hide-scrollbar min-h-0 flex-1 list-none divide-y divide-border overflow-y-auto py-1">
                 {showNoResults ? (
                   <li className="px-3 py-2 text-sm text-muted-foreground">No results.</li>
@@ -227,85 +223,73 @@ export function RateMovieDialog({
               </ul>
             </div>
           ) : (
-            <form onSubmit={onSubmitRating} className="flex min-h-0 flex-1 flex-col gap-5">
-              <header className="shrink-0 space-y-1">
-                <p className="text-lg font-semibold leading-tight text-foreground sm:text-xl">
-                  {selected.title}
-                </p>
-                <p className="text-sm text-muted-foreground">
+            <form onSubmit={onSubmitRating} className="flex flex-col gap-4">
+              <header className="shrink-0 space-y-0.5">
+                <p className="font-semibold leading-tight text-foreground">{selected.title}</p>
+                <p className="text-xs text-muted-foreground">
                   {selected.genres.length === 0 ? "No genres" : selected.genres.join(", ")}
                 </p>
               </header>
 
-              <div className="flex min-h-0 flex-1 flex-col gap-5">
-                <div className="flex w-full flex-col gap-2">
-                  <label htmlFor="rate-value" className="text-sm font-medium text-foreground">
-                    Rating
-                  </label>
-                  <input
-                    id="rate-value"
-                    type="number"
-                    name="rating"
-                    min={0}
-                    max={5}
-                    step={0.1}
-                    value={ratingInput}
-                    onChange={(e) => setRatingInput(e.target.value)}
-                    className={mergeTailwindClasses(
-                      "h-11 w-full rounded-md border border-border bg-background px-3 text-base tabular-nums text-foreground",
-                      "outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                    )}
-                    disabled={submitBusy || deleteBusy}
-                  />
-                </div>
-
-                <label className="flex w-full cursor-pointer items-center gap-3 text-sm text-foreground">
-                  <input
-                    type="checkbox"
-                    checked={like}
-                    onChange={(e) => setLike(e.target.checked)}
-                    disabled={submitBusy || deleteBusy}
-                    className="size-4 rounded border-border accent-primary"
-                  />
-                  Like
+              <div className="flex flex-wrap items-center gap-3">
+                <label htmlFor="rate-value" className="text-sm font-medium text-foreground">
+                  Rating
                 </label>
-
-                {submitError != null ? (
-                  <p className="text-sm text-destructive" role="alert">
-                    {submitError}
-                  </p>
-                ) : null}
-              </div>
-
-              <div className="mt-auto flex shrink-0 w-full flex-col gap-3">
-                <button
-                  type="submit"
-                  disabled={submitBusy || deleteBusy}
+                <input
+                  id="rate-value"
+                  type="number"
+                  name="rating"
+                  min={0}
+                  max={5}
+                  step={0.1}
+                  value={ratingInput}
+                  onChange={(e) => setRatingInput(e.target.value)}
                   className={mergeTailwindClasses(
-                    "h-11 w-full rounded-md text-sm font-semibold text-foreground",
-                    "table-elevated-surface hover:bg-muted",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                    "disabled:pointer-events-none disabled:opacity-50",
+                    "table-elevated-surface h-9 w-20 cursor-text rounded-md px-2.5 text-sm tabular-nums text-foreground",
+                    "outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    submitBusy && "cursor-not-allowed opacity-60",
                   )}
-                >
-                  {deleteBusy ? "Deleting..." : submitBusy ? "Saving..." : "Save rating"}
-                </button>
+                  disabled={submitBusy}
+                />
                 <button
                   type="button"
-                  onClick={() => {
-                    void onDeleteRating();
-                  }}
-                  disabled={submitBusy || deleteBusy}
+                  onClick={() => setLike((v) => !v)}
+                  disabled={submitBusy}
+                  aria-label={like ? "Unlike" : "Like"}
                   className={mergeTailwindClasses(
-                    "inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-destructive/50 bg-transparent px-3 text-sm font-medium text-destructive",
-                    "hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                    "disabled:pointer-events-none disabled:opacity-40",
+                    "table-elevated-surface inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-md px-2.5 text-sm font-medium",
+                    "outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
+                    "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+                    like ? "text-destructive" : "text-muted-foreground hover:text-foreground",
                   )}
                 >
-                  <Trash2 className="size-4 shrink-0" aria-hidden />
-                  Delete rating
+                  <Heart
+                    className="size-3.5 shrink-0"
+                    fill={like ? "currentColor" : "none"}
+                    aria-hidden
+                  />
+                  Like
                 </button>
               </div>
+
+              {submitError != null ? (
+                <p className="text-xs text-destructive" role="alert">
+                  {submitError}
+                </p>
+              ) : null}
+
+              <button
+                type="submit"
+                disabled={submitBusy}
+                className={mergeTailwindClasses(
+                  "table-elevated-surface h-9 w-full cursor-pointer rounded-md text-sm font-semibold text-foreground",
+                  "outline-none hover:bg-muted",
+                  "focus-visible:ring-2 focus-visible:ring-ring",
+                  "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+                )}
+              >
+                {submitBusy ? "Saving..." : "Save rating"}
+              </button>
             </form>
           )}
         </div>

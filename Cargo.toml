@@ -4,7 +4,7 @@ members = [
     "crates/database",
     "crates/database/migration",
     "crates/rpc",
-    "scripts/imdb",
+    "scripts/tmdb",
 ]
 
 [workspace.package]

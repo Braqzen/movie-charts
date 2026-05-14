@@ -558,5 +558,15 @@
     "name": "Captive State",
     "id": 112,
     "categories": ["action", "thriller", "science fiction"]
+  },
+  {
+    "name": "Geostorm",
+    "id": 113,
+    "categories": ["action", "thriller", "science fiction"]
+  },
+  {
+    "name": "Extinction",
+    "id": 114,
+    "categories": ["action", "drama", "thriller", "science fiction"]
   }
 ]

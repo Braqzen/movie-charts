@@ -1,15 +1,14 @@
 use crate::{
     Database,
     entities::{
-        genres,
+        genres, keywords,
         movies::{ActiveModel, Column, Model},
-        prelude::{Genres, Movies},
+        prelude::{Genres, Keywords, Movies},
     },
 };
 use eyre::Result;
 use sea_orm::{
-    ActiveValue::Set,
-    ColumnTrait, Condition, EntityTrait, QueryFilter,
+    ActiveValue::Set, ColumnTrait, Condition, EntityTrait, QueryFilter,
     sea_query::{Expr, extension::postgres::PgBinOper, extension::postgres::PgExpr},
 };
 use std::collections::{HashMap, HashSet};
@@ -19,6 +18,7 @@ pub struct MovieWithGenres {
     pub id: i32,
     pub title: String,
     pub genres: Vec<String>,
+    pub keywords: Vec<String>,
 }
 
 #[derive(Clone, Debug)]
@@ -30,11 +30,18 @@ pub struct MovieRecommendation {
 }
 
 impl Database {
-    pub async fn insert_movie(&self, id: i32, title: String, genres: Vec<i32>) -> Result<()> {
+    pub async fn insert_movie(
+        &self,
+        id: i32,
+        title: String,
+        genres: Vec<i32>,
+        keywords: Vec<i32>,
+    ) -> Result<()> {
         Movies::insert(ActiveModel {
             id: Set(id),
             title: Set(title),
             genres: Set(genres),
+            keywords: Set(keywords),
         })
         .exec(&self.connection)
         .await?;
@@ -57,14 +64,34 @@ impl Database {
             .iter()
             .flat_map(|movie| movie.genres.iter().copied())
             .collect::<Vec<_>>();
+        let keyword_ids = movies
+            .iter()
+            .flat_map(|movie| movie.keywords.iter().copied())
+            .collect::<Vec<_>>();
 
-        let genres = Genres::find()
-            .filter(genres::Column::Id.is_in(genre_ids))
-            .all(&self.connection)
-            .await?
-            .into_iter()
-            .map(|genre| (genre.id, genre.title))
-            .collect::<HashMap<_, _>>();
+        let genres = if genre_ids.is_empty() {
+            HashMap::new()
+        } else {
+            Genres::find()
+                .filter(genres::Column::Id.is_in(genre_ids))
+                .all(&self.connection)
+                .await?
+                .into_iter()
+                .map(|genre| (genre.id, genre.title))
+                .collect::<HashMap<_, _>>()
+        };
+
+        let keywords = if keyword_ids.is_empty() {
+            HashMap::new()
+        } else {
+            Keywords::find()
+                .filter(keywords::Column::Id.is_in(keyword_ids))
+                .all(&self.connection)
+                .await?
+                .into_iter()
+                .map(|keyword| (keyword.id, keyword.title))
+                .collect::<HashMap<_, _>>()
+        };
 
         Ok(movies
             .into_iter()
@@ -75,6 +102,11 @@ impl Database {
                     .genres
                     .into_iter()
                     .filter_map(|id| genres.get(&id).cloned())
+                    .collect(),
+                keywords: movie
+                    .keywords
+                    .into_iter()
+                    .filter_map(|id| keywords.get(&id).cloned())
                     .collect(),
             })
             .collect())

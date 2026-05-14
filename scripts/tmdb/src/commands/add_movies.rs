@@ -1,4 +1,4 @@
-use crate::client::{ImdbClient, QueryResult};
+use crate::client::{QueryResult, TmdbClient};
 use clap::Args;
 use database::Database;
 use eyre::Result;
@@ -31,7 +31,7 @@ impl AddMovies {
     pub async fn run(
         &self,
         database: &Database,
-        client: &ImdbClient,
+        client: &TmdbClient,
         shutdown: Arc<AtomicBool>,
     ) -> Result<()> {
         let file = File::open(&self.file)?;
@@ -50,13 +50,13 @@ impl AddMovies {
                 let movie: MovieLine = serde_json::from_str(line.as_str())?;
                 let movie: Movie = movie.into();
 
-                // If invalid then skip so we do not query imdb
+                // If invalid then skip so we do not query tmdb
                 match database.invalid_movie(movie.id).await {
                     Ok(true) => continue,
                     _ => {}
                 }
 
-                // If movie already exists then skip so we do not query imdb
+                // If movie already exists then skip so we do not query tmdb
                 match database.movie(movie.id).await {
                     Ok(Some(_)) => continue,
                     _ => {}
@@ -88,6 +88,12 @@ impl AddMovies {
                                     .iter()
                                     .map(|genre| genre.id)
                                     .collect::<Vec<i32>>(),
+                                details
+                                    .keywords
+                                    .keywords
+                                    .iter()
+                                    .map(|keyword| keyword.id)
+                                    .collect::<Vec<i32>>(),
                             )
                             .await
                         {
@@ -115,6 +121,20 @@ impl AddMovies {
                             .await
                         {
                             eprintln!("Error adding genres: {} - {error:?}", movie.id);
+                        }
+
+                        if let Err(error) = database
+                            .new_keywords(
+                                details
+                                    .keywords
+                                    .keywords
+                                    .iter()
+                                    .map(|keyword| (keyword.id, keyword.name.clone()))
+                                    .collect(),
+                            )
+                            .await
+                        {
+                            eprintln!("Error adding keywords: {} - {error:?}", movie.id);
                         }
                     }
                 }

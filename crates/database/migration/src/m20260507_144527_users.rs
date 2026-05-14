@@ -1,4 +1,4 @@
-use crate::m20220101_000001_movie_table::Movies;
+use crate::m20220101_000001_movie_table::{Keywords, Movies};
 use sea_orm_migration::{prelude::*, schema::*};
 
 #[derive(DeriveMigrationName)]
@@ -59,10 +59,55 @@ impl MigrationTrait for Migration {
             )
             .await?;
 
+        manager
+            .create_table(
+                Table::create()
+                    .table(UserKeywords::Table)
+                    .if_not_exists()
+                    .col(integer(UserKeywords::UserId))
+                    .col(integer(UserKeywords::KeywordId))
+                    .primary_key(
+                        Index::create()
+                            .col(UserKeywords::UserId)
+                            .col(UserKeywords::KeywordId),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .from(UserKeywords::Table, UserKeywords::UserId)
+                            .to(Users::Table, Users::Id)
+                            .on_delete(ForeignKeyAction::Cascade)
+                            .on_update(ForeignKeyAction::Restrict),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .from(UserKeywords::Table, UserKeywords::KeywordId)
+                            .to(Keywords::Table, Keywords::Id)
+                            .on_delete(ForeignKeyAction::Cascade)
+                            .on_update(ForeignKeyAction::Restrict),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_index(
+                Index::create()
+                    .if_not_exists()
+                    .table(UserKeywords::Table)
+                    .col(UserKeywords::UserId)
+                    .name("user_keywords_user_id_index")
+                    .to_owned(),
+            )
+            .await?;
+
         Ok(())
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+        manager
+            .drop_table(Table::drop().table(UserKeywords::Table).to_owned())
+            .await?;
+
         manager
             .drop_table(Table::drop().table(Ratings::Table).to_owned())
             .await?;
@@ -90,4 +135,11 @@ enum Ratings {
     MovieId,
     Rating,
     Like,
+}
+
+#[derive(DeriveIden)]
+enum UserKeywords {
+    Table,
+    UserId,
+    KeywordId,
 }
